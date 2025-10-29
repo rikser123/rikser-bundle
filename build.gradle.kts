@@ -1,7 +1,7 @@
 import org.gradle.api.publish.PublishingExtension
 
 plugins {
-	java
+	`java-library`
 	id("org.springframework.boot") version "3.5.5"
 	id("io.spring.dependency-management") version "1.1.7"
 	`maven-publish`
@@ -26,7 +26,7 @@ configure<PublishingExtension> {
 }
 
 group = "rikser123"
-version = "0.0.5"
+version = "0.0.6"
 description = "Bundle"
 
 java {
@@ -48,19 +48,19 @@ repositories {
 val mockitoAgent = configurations.create("mockitoAgent")
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-data-rest")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.springframework.boot:spring-boot-starter-validation:3.5.6")
-	implementation("org.mapstruct:mapstruct:1.5.5.Final")
-	implementation("org.liquibase:liquibase-core")
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
-	implementation("io.jsonwebtoken:jjwt:0.13.0")
-	implementation("org.springframework.boot:spring-boot-starter-security")
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+	api("org.springframework.boot:spring-boot-starter-data-jpa")
+	api("org.springframework.boot:spring-boot-starter-data-rest")
+	api("org.springframework.boot:spring-boot-starter-web")
+	api("org.springframework.boot:spring-boot-starter-validation:3.5.6")
+	api("org.mapstruct:mapstruct:1.5.5.Final")
+	api("org.liquibase:liquibase-core")
+	api("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+	api("io.jsonwebtoken:jjwt:0.13.0")
+	api("org.springframework.boot:spring-boot-starter-security")
+	api("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
-	runtimeOnly("com.h2database:h2")
 	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
