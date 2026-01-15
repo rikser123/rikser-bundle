@@ -23,6 +23,7 @@ public class RikserResponseUtils {
         response.setErrors(errors);
         response.setWarnings(warnings);
         response.setMessage(message);
+        response.setHttpStatus(status);
         return response;
     }
 
