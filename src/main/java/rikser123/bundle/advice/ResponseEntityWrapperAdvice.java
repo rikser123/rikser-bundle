@@ -1,5 +1,6 @@
 package rikser123.bundle.advice;
 
+import lombok.NoArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
@@ -13,6 +14,7 @@ import rikser123.bundle.dto.response.RikserResponseItem;
 
 @RestControllerAdvice
 @Order(1)
+@NoArgsConstructor
 public class ResponseEntityWrapperAdvice implements ResponseBodyAdvice<Object> {
 
     @Override

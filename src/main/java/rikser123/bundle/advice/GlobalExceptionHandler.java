@@ -2,6 +2,7 @@ package rikser123.bundle.advice;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import java.util.List;
 @RestControllerAdvice
 @Slf4j
 @Order(-2) // поднятие приоритета по сравнению с актуатором
+@NoArgsConstructor
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
