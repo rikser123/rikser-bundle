@@ -22,9 +22,8 @@ public class BundleAutoConfiguration {
         return new GlobalExceptionHandler();
     }
 
-    @Bean("ResponseEntityWrapperAdvice")
-    @ConditionalOnMissingBean
-    public ResponseBodyAdvice<Object> responseEntityWrapperAdvice() {
+    @Bean()
+    public ResponseEntityWrapperAdvice responseEntityWrapperAdvice() {
         return new ResponseEntityWrapperAdvice();
     }
 
