@@ -1,9 +1,8 @@
-package rikser123.bundle.config;
+package rikser123.bundle.autoconfigure;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import rikser123.bundle.advice.GlobalExceptionHandler;
 import rikser123.bundle.advice.ResponseEntityWrapperAdvice;
@@ -16,7 +15,6 @@ import rikser123.bundle.service.impl.StatusMatrixImpl;
  */
 
 @AutoConfiguration
-@ComponentScan("rikser123.bundle")
 public class BundleAutoConfiguration {
 
     @Bean
