@@ -26,7 +26,7 @@ configure<PublishingExtension> {
 }
 
 group = "rikser123"
-version = "0.0.12"
+version = "0.0.14"
 description = "Bundle"
 
 java {
