@@ -1,9 +1,7 @@
 package rikser123.bundle.advice;
 
-import lombok.NoArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -15,7 +13,7 @@ import rikser123.bundle.dto.response.RikserResponseItem;
 
 @RestControllerAdvice
 @Order(1)
-@NoArgsConstructor
+@No
 public class ResponseEntityWrapperAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
@@ -37,11 +35,10 @@ public class ResponseEntityWrapperAdvice implements ResponseBodyAdvice<Object> {
         if (body instanceof RikserResponseItem<?> bodyResponse) {
             var httpStatus = bodyResponse.getHttpStatus();
             bodyResponse.setHttpStatus(null);
-
-            return new ResponseEntity(body, null, httpStatus);
+            return ResponseEntity.status(httpStatus).body(bodyResponse);
         }
 
-        return new ResponseEntity(body, null, HttpStatus.OK);
+        return ResponseEntity.ok().body(body);
     }
 }
 
