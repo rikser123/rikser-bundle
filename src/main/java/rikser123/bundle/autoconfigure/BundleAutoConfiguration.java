@@ -9,7 +9,6 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import rikser123.bundle.advice.GlobalExceptionHandler;
-import rikser123.bundle.advice.ResponseEntityWrapperAdvice;
 import rikser123.bundle.component.TransactionHandler;
 import rikser123.bundle.service.StatusMatrix;
 import rikser123.bundle.service.impl.StatusMatrixImpl;
@@ -24,11 +23,6 @@ public class BundleAutoConfiguration {
     @Bean
     public GlobalExceptionHandler globalExceptionHandler() {
         return new GlobalExceptionHandler();
-    }
-
-    @Bean()
-    public ResponseEntityWrapperAdvice responseEntityWrapperAdvice() {
-        return new ResponseEntityWrapperAdvice();
     }
 
     @Bean

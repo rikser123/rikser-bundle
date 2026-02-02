@@ -26,7 +26,7 @@ configure<PublishingExtension> {
 }
 
 group = "rikser123"
-version = "0.0.20"
+version = "0.0.21"
 description = "Bundle"
 
 java {
@@ -58,6 +58,7 @@ dependencies {
 	api("io.jsonwebtoken:jjwt:0.13.0")
 	api("org.springframework.boot:spring-boot-starter-security")
 	api("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+	api("org.springframework.boot:spring-boot-starter-webflux")
 
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
