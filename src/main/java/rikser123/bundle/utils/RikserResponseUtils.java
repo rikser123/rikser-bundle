@@ -35,7 +35,7 @@ public class RikserResponseUtils {
         return createResponse(true, data, HttpStatus.OK, null, null, null);
     }
 
-    public static RikserResponseItem createResponse(
+    public static <T> RikserResponseItem<T> createResponse(
             HttpStatus status,
             Map<String, List<String>> errors,
             Map<String, List<String>> warnings
@@ -43,7 +43,7 @@ public class RikserResponseUtils {
         return createResponse(false, null, status, errors, warnings, null);
     }
 
-    public static RikserResponseItem createResponse(String message, HttpStatus status) {
+    public static <T> RikserResponseItem<T> createResponse(String message, HttpStatus status) {
         return createResponse(false, null, status, null, null, message);
     }
 }
