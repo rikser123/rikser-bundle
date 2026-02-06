@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import rikser123.bundle.advice.GlobalExceptionHandler;
 import rikser123.bundle.component.TransactionHandler;
 import rikser123.bundle.service.StatusMatrix;
@@ -36,6 +37,7 @@ public class BundleAutoConfiguration {
     }
 
     @Bean
+    @Primary
     public ObjectMapper customObjectMapper() {
         return new ObjectMapper()
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
@@ -47,6 +49,7 @@ public class BundleAutoConfiguration {
             .registerModule(new ParameterNamesModule())
             .registerModule(new JavaTimeModule())
             .setDefaultPropertyInclusion(
-                JsonInclude.Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.ALWAYS));
+                JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL))
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 }
