@@ -14,6 +14,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import rikser123.bundle.dto.response.RikserResponseItem;
+import rikser123.bundle.exception.SqlSafeException;
 import rikser123.bundle.utils.RikserResponseUtils;
 
 import java.util.ArrayList;
@@ -85,6 +86,15 @@ public class GlobalExceptionHandler {
     public Mono<RikserResponseItem> handleEntityNotFoundException(EntityNotFoundException exception, ServerWebExchange exchange) {
         log.warn("entity exists", exception);
         var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
+
+        return Mono.just(response);
+    }
+
+    @ExceptionHandler(SqlSafeException.class)
+    public Mono<RikserResponseItem> handleSqlSaveException(SqlSafeException exception, ServerWebExchange exchange) {
+        log.warn("sql injection");
+        var response = RikserResponseUtils.createResponse(exception.getMessage(),HttpStatus.BAD_REQUEST);
         exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
 
         return Mono.just(response);
