@@ -17,7 +17,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           fetch-depth: 0
-          ref: main
+          ref: ${{ github.event.release.target_commitish }}
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -39,7 +39,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add build.gradle.kts
           git commit -m "Bump version to ${GITHUB_REF_NAME#v}"
-          git push origin main
+          git push origin ${{ github.event.release.target_commitish }}
 
       - name: Publish package
         run: ./gradlew publish
