@@ -10,23 +10,23 @@ import java.util.Map;
 
 @Service
 public class StatusMatrixImpl<T extends Enum<T>> implements StatusMatrix<T> {
-    private final Map<T, EnumSet<T>> transitions = new HashMap<>();
+  private final Map<T, EnumSet<T>> transitions = new HashMap<>();
 
-    @Override
-    public void addTransition(T src, EnumSet<T> dest) {
-        this.transitions.merge(src, dest, (destStatuses, newDestStatuses) -> {
-            destStatuses.addAll(newDestStatuses);
-            return destStatuses;
-        });
+  @Override
+  public void addTransition(T src, EnumSet<T> dest) {
+    this.transitions.merge(src, dest, (destStatuses, newDestStatuses) -> {
+      destStatuses.addAll(newDestStatuses);
+      return destStatuses;
+    });
+  }
+
+  @Override
+  public boolean isAvailable(T src, T dest) {
+    var set = transitions.get(src);
+
+    if (CollectionUtils.isNotEmpty(set)) {
+      return set.contains(dest);
     }
-
-    @Override
-    public boolean isAvailable(T src, T dest) {
-        var set = transitions.get(src);
-
-        if (CollectionUtils.isNotEmpty(set)) {
-            return set.contains(dest);
-        }
-        return false;
-    }
+    return false;
+  }
 }

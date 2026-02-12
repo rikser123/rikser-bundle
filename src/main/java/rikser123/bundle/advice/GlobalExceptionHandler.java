@@ -23,7 +23,6 @@ import java.util.List;
 
 /**
  * Класс для работы с глобальными исключениями
- *
  */
 
 @RestControllerAdvice
@@ -32,76 +31,76 @@ import java.util.List;
 @NoArgsConstructor
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(WebExchangeBindException.class)
-    public Mono<RikserResponseItem> handleValidationException(WebExchangeBindException exception, ServerWebExchange exchange) {
-        var errors = new HashMap<String, List<String>>();
+  private static String getFieldLastPart(String field) {
+    var fieldParts = field.split("\\.");
+    return fieldParts[fieldParts.length - 1];
+  }
 
-        exception.getBindingResult().getAllErrors().forEach(error -> {
-            var fieldName = ((FieldError) error).getField();
-            var message = error.getDefaultMessage();
+  @ExceptionHandler(WebExchangeBindException.class)
+  public Mono<RikserResponseItem> handleValidationException(WebExchangeBindException exception, ServerWebExchange exchange) {
+    var errors = new HashMap<String, List<String>>();
 
-            var fieldLastPart = getFieldLastPart(fieldName);
-            errors.computeIfPresent(fieldLastPart, (key, value) -> {
-                value.add(message);
-                return value;
-            });
-            errors.putIfAbsent(fieldLastPart, new ArrayList<>(List.of(message)));
-        });
+    exception.getBindingResult().getAllErrors().forEach(error -> {
+      var fieldName = ((FieldError) error).getField();
+      var message = error.getDefaultMessage();
 
-        var response = RikserResponseUtils.createResponse(HttpStatus.BAD_REQUEST, errors, null);
-        exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
+      var fieldLastPart = getFieldLastPart(fieldName);
+      errors.computeIfPresent(fieldLastPart, (key, value) -> {
+        value.add(message);
+        return value;
+      });
+      errors.putIfAbsent(fieldLastPart, new ArrayList<>(List.of(message)));
+    });
 
-        return Mono.just(response);
-    }
+    var response = RikserResponseUtils.createResponse(HttpStatus.BAD_REQUEST, errors, null);
+    exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
 
-    @ExceptionHandler(RuntimeException.class)
-    public Mono<RikserResponseItem> handleRuntimeException(RuntimeException exception, ServerWebExchange exchange) {
-        log.error("Internal server error", exception);
+    return Mono.just(response);
+  }
 
-        var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+  @ExceptionHandler(RuntimeException.class)
+  public Mono<RikserResponseItem> handleRuntimeException(RuntimeException exception, ServerWebExchange exchange) {
+    log.error("Internal server error", exception);
 
-        return Mono.just(response);
-    }
+    var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public Mono<RikserResponseItem> handleAccessDeniedException(AccessDeniedException exception,  ServerWebExchange exchange) {
-        log.warn("access forbidden", exception);
-        var response = RikserResponseUtils.createResponse("Доступ к запрашиваемому ресурсу запрещен", HttpStatus.FORBIDDEN);
-        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+    return Mono.just(response);
+  }
 
-        return Mono.just(response);
-    }
+  @ExceptionHandler(AccessDeniedException.class)
+  public Mono<RikserResponseItem> handleAccessDeniedException(AccessDeniedException exception, ServerWebExchange exchange) {
+    log.warn("access forbidden", exception);
+    var response = RikserResponseUtils.createResponse("Доступ к запрашиваемому ресурсу запрещен", HttpStatus.FORBIDDEN);
+    exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
 
-    @ExceptionHandler(EntityExistsException.class)
-    public Mono<RikserResponseItem> handleEntityExistsException(EntityExistsException exception, ServerWebExchange exchange) {
-        log.warn("entity exists", exception);
-        var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    return Mono.just(response);
+  }
 
-        exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
-        return Mono.just(response);
-    }
+  @ExceptionHandler(EntityExistsException.class)
+  public Mono<RikserResponseItem> handleEntityExistsException(EntityExistsException exception, ServerWebExchange exchange) {
+    log.warn("entity exists", exception);
+    var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public Mono<RikserResponseItem> handleEntityNotFoundException(EntityNotFoundException exception, ServerWebExchange exchange) {
-        log.warn("entity exists", exception);
-        var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
-        exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
+    exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
+    return Mono.just(response);
+  }
 
-        return Mono.just(response);
-    }
+  @ExceptionHandler(EntityNotFoundException.class)
+  public Mono<RikserResponseItem> handleEntityNotFoundException(EntityNotFoundException exception, ServerWebExchange exchange) {
+    log.warn("entity exists", exception);
+    var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
 
-    @ExceptionHandler(SqlSafeException.class)
-    public Mono<RikserResponseItem> handleSqlSaveException(SqlSafeException exception, ServerWebExchange exchange) {
-        log.warn("sql injection");
-        var response = RikserResponseUtils.createResponse(exception.getMessage(),HttpStatus.BAD_REQUEST);
-        exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
+    return Mono.just(response);
+  }
 
-        return Mono.just(response);
-    }
+  @ExceptionHandler(SqlSafeException.class)
+  public Mono<RikserResponseItem> handleSqlSaveException(SqlSafeException exception, ServerWebExchange exchange) {
+    log.warn("sql injection");
+    var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
 
-    private static String getFieldLastPart(String field) {
-        var fieldParts = field.split("\\.");
-        return fieldParts[fieldParts.length - 1];
-    }
+    return Mono.just(response);
+  }
 }

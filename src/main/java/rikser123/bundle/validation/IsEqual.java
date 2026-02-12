@@ -12,10 +12,13 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = IsEqualConstraint.class)
 public @interface IsEqual {
-    String firstField();
-    String secondField();
-    String message() default "Значения полей не совпадают";
+  String firstField();
 
-    Class<?>[] groups() default {};
-    Class<? extends Payload>[] payload() default {};
+  String secondField();
+
+  String message() default "Значения полей не совпадают";
+
+  Class<?>[] groups() default {};
+
+  Class<? extends Payload>[] payload() default {};
 }

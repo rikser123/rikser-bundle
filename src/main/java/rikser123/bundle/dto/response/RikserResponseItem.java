@@ -14,10 +14,10 @@ import java.util.Map;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RikserResponseItem<T> {
-    private boolean result;
-    private T data;
-    private Map<String, List<String>> errors;
-    private Map<String, List<String>> warnings;
-    private String message;
-    private HttpStatus httpStatus;
+  private boolean result;
+  private T data;
+  private Map<String, List<String>> errors;
+  private Map<String, List<String>> warnings;
+  private String message;
+  private HttpStatus httpStatus;
 }

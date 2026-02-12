@@ -14,7 +14,9 @@ import java.lang.annotation.Target;
 @Documented
 @Constraint(validatedBy = CheckSqlInjectionConstraint.class)
 public @interface CheckSqlInjection {
-    Class<?>[] groups() default {};
-    Class<? extends Payload>[] payload() default {};
-    String message() default "Поле содержит sql инъекции!";
+  Class<?>[] groups() default {};
+
+  Class<? extends Payload>[] payload() default {};
+
+  String message() default "Поле содержит sql инъекции!";
 }

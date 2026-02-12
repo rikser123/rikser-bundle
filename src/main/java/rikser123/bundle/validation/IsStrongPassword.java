@@ -12,9 +12,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = IsStrongPasswordConstraint.class)
 public @interface IsStrongPassword {
-    String message() default "Пароль не безопасный";
-    int passwordMinLength() default 8;
+  String message() default "Пароль не безопасный";
 
-    Class<?>[] groups() default {};
-    Class<? extends Payload>[] payload() default {};
+  int passwordMinLength() default 8;
+
+  Class<?>[] groups() default {};
+
+  Class<? extends Payload>[] payload() default {};
 }

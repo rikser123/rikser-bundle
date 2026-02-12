@@ -10,21 +10,21 @@ import java.util.List;
 
 @Slf4j
 public class CheckSqlInjectionConstraint implements ConstraintValidator<CheckSqlInjection, Object> {
-    @Override
-    public boolean isValid(Object field, ConstraintValidatorContext context) {
-        var isValid = true;
-        if (field instanceof List<?> list) {
-            isValid = list.stream().anyMatch(SqlSafeUtils::isSqlSave);
-        } else {
-            isValid = SqlSafeUtils.isSqlSave(field);
-        }
-
-        if (!isValid) {
-            var message = "%s содержит sql инъекцию".formatted(field);
-            log.warn("{} содержит sql инъекцию", field);
-            throw new SqlSafeException(message);
-        }
-
-        return isValid;
+  @Override
+  public boolean isValid(Object field, ConstraintValidatorContext context) {
+    var isValid = true;
+    if (field instanceof List<?> list) {
+      isValid = list.stream().anyMatch(SqlSafeUtils::isSqlSave);
+    } else {
+      isValid = SqlSafeUtils.isSqlSave(field);
     }
+
+    if (!isValid) {
+      var message = "%s содержит sql инъекцию".formatted(field);
+      log.warn("{} содержит sql инъекцию", field);
+      throw new SqlSafeException(message);
+    }
+
+    return isValid;
+  }
 }

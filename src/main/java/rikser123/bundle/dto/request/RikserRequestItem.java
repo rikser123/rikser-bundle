@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class RikserRequestItem<T> {
-    @Valid private T data;
-    private String channel;
+  @Valid
+  private T data;
+  private String channel;
 }
