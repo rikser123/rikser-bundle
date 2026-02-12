@@ -2,7 +2,7 @@ name: Publish package
 
 on:
   release:
-    types: [created]
+    types: [ created ]
 
 jobs:
   publish:
@@ -18,6 +18,9 @@ jobs:
           distribution: 'temurin'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Run unit tests
+        run: ./gradlew test
 
       - name: Publish package
         run: ./gradlew publish
