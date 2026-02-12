@@ -25,27 +25,8 @@ jobs:
       - name: Run unit tests
         run: ./gradlew test
 
-      - name: Update version in build.gradle
-        run: |
-          # Получаем версию из тега (удаляем префикс v если есть)
-          VERSION=${GITHUB_REF_NAME#v}
-          echo "Setting version to: $VERSION"            
-          
-          sed -i "s/version = \".*\"/version = \"$VERSION\"/" build.gradle.kts
-
-      - name: Commit version update
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add build.gradle.kts
-          git commit -m "Bump version to ${GITHUB_REF_NAME#v}"
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
-          git push origin ${{ github.event.release.target_commitish }}
-
       - name: Publish package
-        run: ./gradlew publish
+        run: ./gradlew publish -Pversion=${GITHUB_REF_NAME#v}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PAT_TOKEN: ${{ secrets.PAT }}
