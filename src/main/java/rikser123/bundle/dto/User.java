@@ -1,6 +1,5 @@
 package rikser123.bundle.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +19,6 @@ import java.util.UUID;
 public class User implements UserDetails {
   private UUID id;
   private String login;
-  @JsonIgnore
   private String password;
   private String email;
   private String status = "REGISTERED";
@@ -33,13 +31,11 @@ public class User implements UserDetails {
   private LocalDateTime updated;
 
   @Override
-  @JsonIgnore
   public String getUsername() {
     return login;
   }
 
   @Override
-  @JsonIgnore
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return privileges.stream()
         .map(userPrivilege -> new SimpleGrantedAuthority(userPrivilege))
@@ -47,25 +43,21 @@ public class User implements UserDetails {
   }
 
   @Override
-  @JsonIgnore
   public boolean isAccountNonExpired() {
     return true;
   }
 
   @Override
-  @JsonIgnore
   public boolean isAccountNonLocked() {
     return true;
   }
 
   @Override
-  @JsonIgnore
   public boolean isCredentialsNonExpired() {
     return true;
   }
 
   @Override
-  @JsonIgnore
   public boolean isEnabled() {
     return true;
   }

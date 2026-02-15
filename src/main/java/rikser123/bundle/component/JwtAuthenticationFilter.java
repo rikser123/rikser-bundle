@@ -74,8 +74,7 @@ public class JwtAuthenticationFilter implements WebFilter {
         .flatMap(
             userDetails -> {
               var authentication = createAuthenticationToken(userDetails);
-              log.warn("autu {}", authentication);
-
+              
               return chain
                   .filter(exchange)
                   .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
