@@ -1,21 +1,13 @@
-package rikser123.bundle.autoconfigure;
+package rikser123.bundle.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
-import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,31 +18,19 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import reactivefeign.ReactiveContract;
-import reactivefeign.spring.config.EnableReactiveFeignClients;
 import reactivefeign.webclient.WebReactiveFeign;
-import rikser123.bundle.advice.GlobalExceptionHandler;
 import rikser123.bundle.component.AuthenticationEntryPoint;
 import rikser123.bundle.component.JwtAuthenticationFilter;
 import rikser123.bundle.component.ResponseStatusFilter;
-import rikser123.bundle.component.TransactionHandler;
 import rikser123.bundle.feign.SecurityClient;
-import rikser123.bundle.service.StatusMatrix;
 import rikser123.bundle.service.UserDetailService;
-import rikser123.bundle.service.impl.StatusMatrixImpl;
 import rikser123.bundle.service.impl.UserDetailServiceImpl;
 
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Автоконфигурация бандла
- */
-
-@AutoConfiguration
-@EnableReactiveFeignClients
-@EnableWebFluxSecurity
-@EnableReactiveMethodSecurity
-public class BundleAutoConfiguration {
+@Configuration
+public class SecurityConfig {
   @Value("${security.service.url}")
   private String securityHost;
 
@@ -71,7 +51,6 @@ public class BundleAutoConfiguration {
         .authorizeExchange(
             exchanges ->
                 exchanges
-                    // Публичные endpoints
                     .pathMatchers("/api/v1/user/register", "/api/v1/user/login")
                     .permitAll()
                     .pathMatchers(
@@ -83,7 +62,6 @@ public class BundleAutoConfiguration {
                     .permitAll()
                     .pathMatchers("/actuator/health", "/actuator/info")
                     .permitAll()
-                    // Все остальные требуют аутентификации
                     .anyExchange()
                     .authenticated())
         .addFilterBefore(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
@@ -98,7 +76,7 @@ public class BundleAutoConfiguration {
   @ConditionalOnProperty(name = "security.enabled", havingValue = "true", matchIfMissing = true)
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    // В production замените на конкретные домены
+
     configuration.setAllowedOriginPatterns(List.of("*"));
     configuration.setAllowedMethods(
         Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
@@ -157,48 +135,5 @@ public class BundleAutoConfiguration {
   @Bean
   public ResponseStatusFilter responseStatusFilter() {
     return new ResponseStatusFilter();
-  }
-
-  @Bean
-  public GlobalExceptionHandler globalExceptionHandler() {
-    return new GlobalExceptionHandler();
-  }
-
-  @Bean
-  public StatusMatrix statusMatrix() {
-    return new StatusMatrixImpl();
-  }
-
-  @Bean
-  public TransactionHandler transactionHandler() {
-    return new TransactionHandler();
-  }
-
-  @Bean
-  public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer() {
-    return builder -> {
-      builder.featuresToDisable(
-          SerializationFeature.FAIL_ON_EMPTY_BEANS,
-          SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
-          SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS
-      );
-
-      builder.featuresToEnable(
-          DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
-      );
-
-      builder.postConfigurer(objectMapper -> {
-        objectMapper.configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
-      });
-
-      builder.serializationInclusion(JsonInclude.Include.NON_NULL);
-
-      builder.modulesToInstall(
-          new ParameterNamesModule(),
-          new JavaTimeModule()
-      );
-
-      builder.findModulesViaServiceLoader(true);
-    };
   }
 }
