@@ -8,11 +8,10 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 import rikser123.bundle.dto.response.RikserResponseItem;
 import rikser123.bundle.exception.SqlSafeException;
 import rikser123.bundle.utils.RikserResponseUtils;
@@ -36,8 +35,8 @@ public class GlobalExceptionHandler {
     return fieldParts[fieldParts.length - 1];
   }
 
-  @ExceptionHandler(WebExchangeBindException.class)
-  public Mono<RikserResponseItem> handleValidationException(WebExchangeBindException exception, ServerWebExchange exchange) {
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public RikserResponseItem handleValidationException(MethodArgumentNotValidException exception, ServerWebExchange exchange) {
     var errors = new HashMap<String, List<String>>();
 
     exception.getBindingResult().getAllErrors().forEach(error -> {
@@ -55,52 +54,52 @@ public class GlobalExceptionHandler {
     var response = RikserResponseUtils.createResponse(HttpStatus.BAD_REQUEST, errors, null);
     exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
 
-    return Mono.just(response);
+    return response;
   }
 
   @ExceptionHandler(RuntimeException.class)
-  public Mono<RikserResponseItem> handleRuntimeException(RuntimeException exception, ServerWebExchange exchange) {
+  public RikserResponseItem handleRuntimeException(RuntimeException exception, ServerWebExchange exchange) {
     log.error("Internal server error", exception);
 
     var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 
-    return Mono.just(response);
+    return response;
   }
 
   @ExceptionHandler(AccessDeniedException.class)
-  public Mono<RikserResponseItem> handleAccessDeniedException(AccessDeniedException exception, ServerWebExchange exchange) {
+  public RikserResponseItem handleAccessDeniedException(AccessDeniedException exception, ServerWebExchange exchange) {
     log.warn("access forbidden", exception);
     var response = RikserResponseUtils.createResponse("Доступ к запрашиваемому ресурсу запрещен", HttpStatus.FORBIDDEN);
     exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
 
-    return Mono.just(response);
+    return response;
   }
 
   @ExceptionHandler(EntityExistsException.class)
-  public Mono<RikserResponseItem> handleEntityExistsException(EntityExistsException exception, ServerWebExchange exchange) {
+  public RikserResponseItem handleEntityExistsException(EntityExistsException exception, ServerWebExchange exchange) {
     log.warn("entity exists", exception);
     var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
 
     exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
-    return Mono.just(response);
+    return response;
   }
 
   @ExceptionHandler(EntityNotFoundException.class)
-  public Mono<RikserResponseItem> handleEntityNotFoundException(EntityNotFoundException exception, ServerWebExchange exchange) {
+  public RikserResponseItem handleEntityNotFoundException(EntityNotFoundException exception, ServerWebExchange exchange) {
     log.warn("entity exists", exception);
     var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
     exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
 
-    return Mono.just(response);
+    return response;
   }
 
   @ExceptionHandler(SqlSafeException.class)
-  public Mono<RikserResponseItem> handleSqlSaveException(SqlSafeException exception, ServerWebExchange exchange) {
+  public RikserResponseItem handleSqlSaveException(SqlSafeException exception, ServerWebExchange exchange) {
     log.warn("sql injection");
     var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
     exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
 
-    return Mono.just(response);
+    return response;
   }
 }

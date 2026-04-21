@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.function.Supplier;
 
 /**
- * Вспомогательный компонент, помогающий выполнять код в транзакциях, при реактивном подходе
+ * Вспомогательный компонент, помогающий выполнять код в транзакциях
  */
 @Component
 public class TransactionHandler {

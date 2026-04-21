@@ -1,73 +1,55 @@
 package rikser123.bundle.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.reactivestreams.Publisher;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
-import reactor.core.publisher.Mono;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.ContentCachingResponseWrapper;
 
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
-public class ResponseStatusFilter implements WebFilter {
+@Slf4j
+public class ResponseStatusFilter extends OncePerRequestFilter {
+
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
-  public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-    var originalResponse = exchange.getResponse();
-    var wrappedResponse = new StatusCapturingResponse(exchange, originalResponse);
+  protected void doFilterInternal(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  FilterChain chain) throws ServletException, IOException {
 
-    return chain.filter(exchange.mutate().response(wrappedResponse).build());
-  }
+    var wrapper = new ContentCachingResponseWrapper(response);
 
-  static class StatusCapturingResponse extends ServerHttpResponseDecorator {
-    private final ServerWebExchange exchange;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      chain.doFilter(request, wrapper);
 
-    StatusCapturingResponse(ServerWebExchange exchange, ServerHttpResponse delegate) {
-      super(delegate);
-      this.exchange = exchange;
-    }
+      byte[] responseBody = wrapper.getContentAsByteArray();
 
-    @Override
-    public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-      if (body instanceof Mono) {
-        var monoBody = (Mono<DataBuffer>) body;
+      if (responseBody.length > 0) {
+        var json = new String(responseBody, wrapper.getCharacterEncoding());
+        var node = objectMapper.readTree(json);
 
-        return monoBody.flatMap(
-            buffer -> {
-              try {
-                var bytes = new byte[buffer.readableByteCount()];
-                buffer.read(bytes);
-                var json = new String(bytes, StandardCharsets.UTF_8);
-
-                var restored = buffer.factory().wrap(bytes);
-
-                var node = objectMapper.readTree(json);
-
-                if (node.has("httpStatus")) {
-                  var status = node.get("httpStatus").toString().replaceAll("\"", "");
-                  getDelegate().setStatusCode(HttpStatus.valueOf(status));
-                }
-
-                return super.writeWith(Mono.just(restored));
-
-              } catch (Exception e) {
-                buffer.readPosition(0);
-                return super.writeWith(Mono.just(buffer));
-              }
-            });
+        if (node.has("httpStatus")) {
+          var statusStr = node.get("httpStatus").asText();
+          var status = HttpStatus.valueOf(statusStr);
+          response.setStatus(status.value());
+        }
       }
 
-      return super.writeWith(body);
+      wrapper.copyBodyToResponse();
+
+    } catch (Exception e) {
+      log.warn("Failed to process response status", e);
+      wrapper.copyBodyToResponse();
     }
   }
 }

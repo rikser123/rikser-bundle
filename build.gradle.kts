@@ -55,10 +55,9 @@ dependencies {
     api("io.jsonwebtoken:jjwt:0.13.0")
     api("org.springframework.boot:spring-boot-starter-security")
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
-    api("org.springframework.boot:spring-boot-starter-webflux")
-    api("com.playtika.reactivefeign:feign-reactor-core:3.2.1")
-    api("com.playtika.reactivefeign:feign-reactor-spring-configuration:3.2.1")
-    api("com.playtika.reactivefeign:feign-reactor-webclient:3.2.1")
+    api("io.github.openfeign:feign-core:13.5")
+    api("io.github.openfeign:feign-jackson:13.5")
+    api("io.github.openfeign:feign-spring:13.5")
 
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
