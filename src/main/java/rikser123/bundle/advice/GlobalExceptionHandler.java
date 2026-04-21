@@ -10,8 +10,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ServerWebExchange;
 import rikser123.bundle.dto.response.RikserResponseItem;
 import rikser123.bundle.exception.SqlSafeException;
 import rikser123.bundle.utils.RikserResponseUtils;
@@ -26,7 +26,7 @@ import java.util.List;
 
 @RestControllerAdvice
 @Slf4j
-@Order(-2) // поднятие приоритета по сравнению с актуатором
+@Order(-2)
 @NoArgsConstructor
 public class GlobalExceptionHandler {
 
@@ -36,7 +36,8 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public RikserResponseItem handleValidationException(MethodArgumentNotValidException exception, ServerWebExchange exchange) {
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public RikserResponseItem handleValidationException(MethodArgumentNotValidException exception) {
     var errors = new HashMap<String, List<String>>();
 
     exception.getBindingResult().getAllErrors().forEach(error -> {
@@ -51,55 +52,41 @@ public class GlobalExceptionHandler {
       errors.putIfAbsent(fieldLastPart, new ArrayList<>(List.of(message)));
     });
 
-    var response = RikserResponseUtils.createResponse(HttpStatus.BAD_REQUEST, errors, null);
-    exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
-
-    return response;
+    return RikserResponseUtils.createResponse(HttpStatus.BAD_REQUEST, errors, null);
   }
 
   @ExceptionHandler(RuntimeException.class)
-  public RikserResponseItem handleRuntimeException(RuntimeException exception, ServerWebExchange exchange) {
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public RikserResponseItem handleRuntimeException(RuntimeException exception) {
     log.error("Internal server error", exception);
-
-    var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-
-    return response;
+    return RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   @ExceptionHandler(AccessDeniedException.class)
-  public RikserResponseItem handleAccessDeniedException(AccessDeniedException exception, ServerWebExchange exchange) {
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public RikserResponseItem handleAccessDeniedException(AccessDeniedException exception) {
     log.warn("access forbidden", exception);
-    var response = RikserResponseUtils.createResponse("Доступ к запрашиваемому ресурсу запрещен", HttpStatus.FORBIDDEN);
-    exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-
-    return response;
+    return RikserResponseUtils.createResponse("Доступ к запрашиваемому ресурсу запрещен", HttpStatus.FORBIDDEN);
   }
 
   @ExceptionHandler(EntityExistsException.class)
-  public RikserResponseItem handleEntityExistsException(EntityExistsException exception, ServerWebExchange exchange) {
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public RikserResponseItem handleEntityExistsException(EntityExistsException exception) {
     log.warn("entity exists", exception);
-    var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
-
-    exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
-    return response;
+    return RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(EntityNotFoundException.class)
-  public RikserResponseItem handleEntityNotFoundException(EntityNotFoundException exception, ServerWebExchange exchange) {
-    log.warn("entity exists", exception);
-    var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
-    exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
-
-    return response;
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public RikserResponseItem handleEntityNotFoundException(EntityNotFoundException exception) {
+    log.warn("entity not found", exception);
+    return RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(SqlSafeException.class)
-  public RikserResponseItem handleSqlSaveException(SqlSafeException exception, ServerWebExchange exchange) {
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public RikserResponseItem handleSqlSaveException(SqlSafeException exception) {
     log.warn("sql injection");
-    var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
-    exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
-
-    return response;
+    return RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
   }
 }
