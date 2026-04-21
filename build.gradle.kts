@@ -58,6 +58,7 @@ dependencies {
     api("io.github.openfeign:feign-core:13.5")
     api("io.github.openfeign:feign-jackson:13.5")
     api("io.github.openfeign:feign-spring:13.5")
+    api("org.springframework.cloud:spring-cloud-starter-openfeign:3.1.8")
 
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
