@@ -45,7 +45,6 @@ public class SecurityConfig {
     CustomAuthenticationEntryPoint customAuthenticationEntryPoint
   ) throws Exception {
     return http
-      .securityMatcher("/api/**")
       .csrf(c -> c.disable())
       .httpBasic(b -> b.disable())
       .anonymous(a -> a.disable())

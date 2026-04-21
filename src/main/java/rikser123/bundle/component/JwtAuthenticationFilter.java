@@ -65,12 +65,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
+    System.out.println(authHeader);
+
     var token = authHeader.substring(BEARER_PREFIX.length());
 
     try {
       var userDetails = userService.getByUsername(token);
+      System.out.println(userDetails);
       var authentication = createAuthenticationToken(userDetails);
+      System.out.println(authentication);
+
       SecurityContextHolder.getContext().setAuthentication(authentication);
+      System.out.println(SecurityContextHolder.getContext());
+
       chain.doFilter(request, response);
     } catch (MalformedJwtException e) {
       sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Некорректный формат JWT токена", e);
