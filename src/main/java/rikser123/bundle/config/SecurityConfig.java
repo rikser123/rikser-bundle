@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -36,8 +37,9 @@ public class SecurityConfig {
   private String securityHost;
 
   @Bean
+  @Order(1)
   @ConditionalOnProperty(name = "security.enabled", havingValue = "true", matchIfMissing = true)
-  public SecurityFilterChain securityFilterChain(
+  public SecurityFilterChain filterChain(
     HttpSecurity http,
     JwtAuthenticationFilter jwtAuthenticationFilter,
     CustomAuthenticationEntryPoint customAuthenticationEntryPoint
