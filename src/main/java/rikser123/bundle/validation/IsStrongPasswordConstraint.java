@@ -6,9 +6,9 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 
 public class IsStrongPasswordConstraint implements ConstraintValidator<IsStrongPassword, String> {
-  private static final Pattern lettersPattern = Pattern.compile("(.*[a-zA-Z]).*");
-  private static final Pattern digitsPattern = Pattern.compile("(.*\\d).*");
-  private static final Pattern specialCharactersPattern = Pattern.compile("(.*[^a-zA-Z\\d].*)");
+  private static final Pattern LETTERS_PATTERN = Pattern.compile("(.*[a-zA-Z]).*");
+  private static final Pattern DIGITS_PATTERN = Pattern.compile("(.*\\d).*");
+  private static final Pattern SPECIAL_CHARACTERS_PATTERN = Pattern.compile("(.*[^a-zA-Z\\d].*)");
   private static final int PASSWORD_GOOD_STRENGTH = 4;
 
   private int passwordMinLength;
@@ -26,17 +26,17 @@ public class IsStrongPasswordConstraint implements ConstraintValidator<IsStrongP
       passwordStrength += 1;
     }
 
-    var lettersMatcher = lettersPattern.matcher(password);
+    var lettersMatcher = LETTERS_PATTERN.matcher(password);
     if (lettersMatcher.matches()) {
       passwordStrength += 1;
     }
 
-    var digitsMatcher = digitsPattern.matcher(password);
+    var digitsMatcher = DIGITS_PATTERN.matcher(password);
     if (digitsMatcher.matches()) {
       passwordStrength += 1;
     }
 
-    var specialMatcher = specialCharactersPattern.matcher(password);
+    var specialMatcher = SPECIAL_CHARACTERS_PATTERN.matcher(password);
     if (specialMatcher.matches()) {
       passwordStrength += 1;
     }

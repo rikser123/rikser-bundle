@@ -48,10 +48,10 @@ public class JwtAuthenticationFilter implements WebFilter {
     }
 
     return authenticate(exchange, chain)
-        .doFinally(
-            signal -> {
-              processedRequests.remove(requestId);
-            });
+      .doFinally(
+        signal -> {
+          processedRequests.remove(requestId);
+        });
   }
 
   /**
@@ -70,29 +70,28 @@ public class JwtAuthenticationFilter implements WebFilter {
     var token = authHeader.substring(BEARER_PREFIX.length());
 
     return userService
-        .getByUsername(token)
-        .flatMap(
-            userDetails -> {
-              var authentication = createAuthenticationToken(userDetails);
-              
-              return chain
-                  .filter(exchange)
-                  .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
-            })
-        .switchIfEmpty(chain.filter(exchange))
-        .onErrorResume(
-            MalformedJwtException.class,
-            e ->
-                sendErrorResponse(
-                    exchange, HttpStatus.BAD_REQUEST, "Некорректный формат JWT токена", e))
-        .onErrorResume(
-            ExpiredJwtException.class,
-            e ->
-                sendErrorResponse(
-                    exchange, HttpStatus.BAD_REQUEST, "Срок действия токена истек", e))
-        .onErrorResume(
-            Exception.class,
-            e -> sendErrorResponse(exchange, HttpStatus.BAD_REQUEST, "Ошибка валидации токена", e));
+      .getByUsername(token)
+      .flatMap(
+        userDetails -> {
+          var authentication = createAuthenticationToken(userDetails);
+          return chain
+            .filter(exchange)
+            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
+        })
+      .switchIfEmpty(chain.filter(exchange))
+      .onErrorResume(
+        MalformedJwtException.class,
+        e ->
+          sendErrorResponse(
+            exchange, HttpStatus.BAD_REQUEST, "Некорректный формат JWT токена", e))
+      .onErrorResume(
+        ExpiredJwtException.class,
+        e ->
+          sendErrorResponse(
+            exchange, HttpStatus.BAD_REQUEST, "Срок действия токена истек", e))
+      .onErrorResume(
+        Exception.class,
+        e -> sendErrorResponse(exchange, HttpStatus.BAD_REQUEST, "Ошибка валидации токена", e));
   }
 
   /**
@@ -103,35 +102,35 @@ public class JwtAuthenticationFilter implements WebFilter {
    * @param message  Сообщение об ошибке
    */
   private Mono<Void> sendErrorResponse(
-      ServerWebExchange exchange, HttpStatus status, String message, Exception e) {
+    ServerWebExchange exchange, HttpStatus status, String message, Exception e) {
     log.warn("ERROR JWT token {}", message, e);
 
     return Mono.fromCallable(
-            () -> {
-              exchange.getResponse().setStatusCode(status);
-              exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        () -> {
+          exchange.getResponse().setStatusCode(status);
+          exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-              var responseBody = RikserResponseUtils.createResponse(message, status);
+          var responseBody = RikserResponseUtils.createResponse(message, status);
 
-              var jsonText = objectMapper.writer().writeValueAsString(responseBody);
-              var bytes = jsonText.getBytes(StandardCharsets.UTF_8);
-              return exchange.getResponse().bufferFactory().wrap(bytes);
-            })
-        .flatMap(buffer -> exchange.getResponse().writeWith(Mono.just(buffer)))
-        .onErrorResume(
-            ex -> {
-              log.error("Error writing authentication error response", ex);
+          var jsonText = objectMapper.writer().writeValueAsString(responseBody);
+          var bytes = jsonText.getBytes(StandardCharsets.UTF_8);
+          return exchange.getResponse().bufferFactory().wrap(bytes);
+        })
+      .flatMap(buffer -> exchange.getResponse().writeWith(Mono.just(buffer)))
+      .onErrorResume(
+        ex -> {
+          log.error("Error writing authentication error response", ex);
 
-              // Fallback: простой текст в случае ошибки
-              var errorMessage = "{\"error\":\"Authentication failed\"}";
-              var buffer =
-                  exchange
-                      .getResponse()
-                      .bufferFactory()
-                      .wrap(errorMessage.getBytes(StandardCharsets.UTF_8));
+          // Fallback: простой текст в случае ошибки
+          var errorMessage = "{\"error\":\"Authentication failed\"}";
+          var buffer =
+            exchange
+              .getResponse()
+              .bufferFactory()
+              .wrap(errorMessage.getBytes(StandardCharsets.UTF_8));
 
-              return exchange.getResponse().writeWith(Mono.just(buffer));
-            });
+          return exchange.getResponse().writeWith(Mono.just(buffer));
+        });
   }
 
   /**
@@ -140,13 +139,13 @@ public class JwtAuthenticationFilter implements WebFilter {
   private UsernamePasswordAuthenticationToken createAuthenticationToken(UserDetails userDetails) {
     var user = (User) userDetails;
     List<SimpleGrantedAuthority> authorities =
-        user.getPrivileges().stream()
-            .map(privilege -> new SimpleGrantedAuthority(privilege))
-            .toList();
+      user.getPrivileges().stream()
+        .map(privilege -> new SimpleGrantedAuthority(privilege))
+        .toList();
 
     return new UsernamePasswordAuthenticationToken(
-        user,
-        null, // credentials - обычно null для JWT
-        authorities);
+      user,
+      null, // credentials - обычно null для JWT
+      authorities);
   }
 }

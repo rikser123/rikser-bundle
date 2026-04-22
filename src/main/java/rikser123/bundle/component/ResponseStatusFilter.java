@@ -32,9 +32,9 @@ public class ResponseStatusFilter implements WebFilter {
     private final ServerWebExchange exchange;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    StatusCapturingResponse(ServerWebExchange exchange, ServerHttpResponse delegate) {
+    StatusCapturingResponse(ServerWebExchange serverExchange, ServerHttpResponse delegate) {
       super(delegate);
-      this.exchange = exchange;
+      this.exchange = serverExchange;
     }
 
     @Override
@@ -43,28 +43,28 @@ public class ResponseStatusFilter implements WebFilter {
         var monoBody = (Mono<DataBuffer>) body;
 
         return monoBody.flatMap(
-            buffer -> {
-              try {
-                var bytes = new byte[buffer.readableByteCount()];
-                buffer.read(bytes);
-                var json = new String(bytes, StandardCharsets.UTF_8);
+          buffer -> {
+            try {
+              var bytes = new byte[buffer.readableByteCount()];
+              buffer.read(bytes);
+              var json = new String(bytes, StandardCharsets.UTF_8);
 
-                var restored = buffer.factory().wrap(bytes);
+              var restored = buffer.factory().wrap(bytes);
 
-                var node = objectMapper.readTree(json);
+              var node = objectMapper.readTree(json);
 
-                if (node.has("httpStatus")) {
-                  var status = node.get("httpStatus").toString().replaceAll("\"", "");
-                  getDelegate().setStatusCode(HttpStatus.valueOf(status));
-                }
-
-                return super.writeWith(Mono.just(restored));
-
-              } catch (Exception e) {
-                buffer.readPosition(0);
-                return super.writeWith(Mono.just(buffer));
+              if (node.has("httpStatus")) {
+                var status = node.get("httpStatus").toString().replaceAll("\"", "");
+                getDelegate().setStatusCode(HttpStatus.valueOf(status));
               }
-            });
+
+              return super.writeWith(Mono.just(restored));
+
+            } catch (Exception e) {
+              buffer.readPosition(0);
+              return super.writeWith(Mono.just(buffer));
+            }
+          });
       }
 
       return super.writeWith(body);

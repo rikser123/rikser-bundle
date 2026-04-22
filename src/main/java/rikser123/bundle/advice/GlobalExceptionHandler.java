@@ -37,7 +37,9 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(WebExchangeBindException.class)
-  public Mono<RikserResponseItem> handleValidationException(WebExchangeBindException exception, ServerWebExchange exchange) {
+  public Mono<RikserResponseItem> handleValidationException(
+    WebExchangeBindException exception, ServerWebExchange exchange
+  ) {
     var errors = new HashMap<String, List<String>>();
 
     exception.getBindingResult().getAllErrors().forEach(error -> {
@@ -69,7 +71,9 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(AccessDeniedException.class)
-  public Mono<RikserResponseItem> handleAccessDeniedException(AccessDeniedException exception, ServerWebExchange exchange) {
+  public Mono<RikserResponseItem> handleAccessDeniedException(
+    AccessDeniedException exception, ServerWebExchange exchange
+  ) {
     log.warn("access forbidden", exception);
     var response = RikserResponseUtils.createResponse("Доступ к запрашиваемому ресурсу запрещен", HttpStatus.FORBIDDEN);
     exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
@@ -78,7 +82,9 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(EntityExistsException.class)
-  public Mono<RikserResponseItem> handleEntityExistsException(EntityExistsException exception, ServerWebExchange exchange) {
+  public Mono<RikserResponseItem> handleEntityExistsException(
+    EntityExistsException exception, ServerWebExchange exchange
+  ) {
     log.warn("entity exists", exception);
     var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
 
@@ -87,7 +93,9 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(EntityNotFoundException.class)
-  public Mono<RikserResponseItem> handleEntityNotFoundException(EntityNotFoundException exception, ServerWebExchange exchange) {
+  public Mono<RikserResponseItem> handleEntityNotFoundException(
+    EntityNotFoundException exception, ServerWebExchange exchange
+  ) {
     log.warn("entity exists", exception);
     var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
     exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);

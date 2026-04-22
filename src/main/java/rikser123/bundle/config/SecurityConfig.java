@@ -37,39 +37,39 @@ public class SecurityConfig {
   @Bean
   @ConditionalOnProperty(name = "security.enabled", havingValue = "true", matchIfMissing = true)
   public SecurityWebFilterChain securityWebFilterChain(
-      ServerHttpSecurity http,
-      ReactiveAuthenticationManager reactiveAuthenticationManager,
-      JwtAuthenticationFilter jwtAuthenticationFilter,
-      AuthenticationEntryPoint authenticationEntryPoint
+    ServerHttpSecurity http,
+    ReactiveAuthenticationManager reactiveAuthenticationManager,
+    JwtAuthenticationFilter jwtAuthenticationFilter,
+    AuthenticationEntryPoint authenticationEntryPoint
 
   ) {
     return http.csrf(csrf -> csrf.disable())
-        .authenticationManager(reactiveAuthenticationManager)
-        .httpBasic(httpBasic -> httpBasic.disable())
-        .anonymous(anonymous -> anonymous.disable())
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .authorizeExchange(
-            exchanges ->
-                exchanges
-                    .pathMatchers("/api/v1/user/register", "/api/v1/user/login")
-                    .permitAll()
-                    .pathMatchers(
-                        "/swagger-ui/**",
-                        "/swagger-ui.html",
-                        "/swagger-resources/**",
-                        "/v3/api-docs/**",
-                        "/webjars/**")
-                    .permitAll()
-                    .pathMatchers("/actuator/health", "/actuator/info")
-                    .permitAll()
-                    .anyExchange()
-                    .authenticated())
-        .addFilterBefore(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
-        .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint))
-        .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
-        .formLogin(form -> form.disable())
-        .logout(logout -> logout.disable())
-        .build();
+      .authenticationManager(reactiveAuthenticationManager)
+      .httpBasic(httpBasic -> httpBasic.disable())
+      .anonymous(anonymous -> anonymous.disable())
+      .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+      .authorizeExchange(
+        exchanges ->
+          exchanges
+            .pathMatchers("/api/v1/user/register", "/api/v1/user/login")
+            .permitAll()
+            .pathMatchers(
+              "/swagger-ui/**",
+              "/swagger-ui.html",
+              "/swagger-resources/**",
+              "/v3/api-docs/**",
+              "/webjars/**")
+            .permitAll()
+            .pathMatchers("/actuator/health", "/actuator/info")
+            .permitAll()
+            .anyExchange()
+            .authenticated())
+      .addFilterBefore(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+      .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint))
+      .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
+      .formLogin(form -> form.disable())
+      .logout(logout -> logout.disable())
+      .build();
   }
 
   @Bean
@@ -79,7 +79,7 @@ public class SecurityConfig {
 
     configuration.setAllowedOriginPatterns(List.of("*"));
     configuration.setAllowedMethods(
-        Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+      Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
     configuration.setAllowedHeaders(List.of("*"));
     configuration.setAllowCredentials(true);
     configuration.setMaxAge(3600L); // 1 час кэширования preflight запросов
@@ -97,15 +97,18 @@ public class SecurityConfig {
   @Bean
   @ConditionalOnProperty(name = "security.enabled", havingValue = "true", matchIfMissing = true)
   public ReactiveAuthenticationManager reactiveAuthenticationManager(
-      PasswordEncoder passwordEncoder, UserDetailService userDetailService) {
+    PasswordEncoder passwordEncoder, UserDetailService userDetailService) {
     UserDetailsRepositoryReactiveAuthenticationManager manager =
-        new UserDetailsRepositoryReactiveAuthenticationManager(userDetailService.userDetailsService());
+      new UserDetailsRepositoryReactiveAuthenticationManager(userDetailService.userDetailsService());
     manager.setPasswordEncoder(passwordEncoder);
     return manager;
   }
 
   @Bean
-  public JwtAuthenticationFilter jwtAuthenticationFilter(UserDetailService userDetailService, ObjectMapper objectMapper) {
+  public JwtAuthenticationFilter jwtAuthenticationFilter(
+    UserDetailService userDetailService,
+    ObjectMapper objectMapper
+  ) {
     return new JwtAuthenticationFilter(userDetailService, objectMapper);
   }
 
@@ -123,8 +126,8 @@ public class SecurityConfig {
   @Bean
   SecurityClient securityClient() {
     return WebReactiveFeign.<SecurityClient>builder()
-        .contract(new ReactiveContract(new SpringMvcContract()))
-        .target(SecurityClient.class, securityHost);
+      .contract(new ReactiveContract(new SpringMvcContract()))
+      .target(SecurityClient.class, securityHost);
   }
 
   @Bean
