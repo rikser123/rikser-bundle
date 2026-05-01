@@ -52,10 +52,9 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-security")
     api("org.springframework.boot:spring-boot-starter-webflux")
     api("org.springframework.boot:spring-boot-starter-data-r2dbc")
-
     api("org.springframework.boot:spring-boot-starter-webmvc")
 
-    api("org.mapstruct:mapstruct:1.6.3.Final")
+    api("org.mapstruct:mapstruct:1.6.3")
     api("org.liquibase:liquibase-core")
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
     api("io.jsonwebtoken:jjwt:0.13.0")
@@ -70,7 +69,7 @@ dependencies {
     runtimeOnly("org.postgresql:r2dbc-postgresql")
 
     annotationProcessor("org.projectlombok:lombok")
-    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3.Final")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
