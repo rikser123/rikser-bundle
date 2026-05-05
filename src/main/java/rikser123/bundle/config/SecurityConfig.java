@@ -46,7 +46,6 @@ public class SecurityConfig {
     return http.csrf(csrf -> csrf.disable())
       .authenticationManager(reactiveAuthenticationManager)
       .httpBasic(httpBasic -> httpBasic.disable())
-      .anonymous(anonymous -> anonymous.disable())
       .cors(cors -> cors.configurationSource(corsConfigurationSource()))
       .authorizeExchange(
         exchanges ->
