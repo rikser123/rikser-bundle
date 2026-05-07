@@ -57,9 +57,9 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-security")
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
     api("org.springframework.boot:spring-boot-starter-webflux")
-    api("com.playtika.reactivefeign:feign-reactor-core:3.2.1")
-    api("com.playtika.reactivefeign:feign-reactor-spring-configuration:3.2.1")
-    api("com.playtika.reactivefeign:feign-reactor-webclient:3.2.1")
+    api("com.playtika.reactivefeign:feign-reactor-core:4.2.0")
+    api("com.playtika.reactivefeign:feign-reactor-webclient:4.2.0")
+    api("com.playtika.reactivefeign:feign-reactor-jackson:4.2.0")
 
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
