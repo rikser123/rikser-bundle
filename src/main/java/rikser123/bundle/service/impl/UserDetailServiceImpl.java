@@ -19,6 +19,7 @@ import rikser123.bundle.service.UserDetailService;
 @Service
 @RequiredArgsConstructor
 public class UserDetailServiceImpl implements UserDetailService {
+  public static final String BEARER_PREFIX = "Bearer ";
   private final SecurityClient securityClient;
 
   @Override
@@ -35,7 +36,7 @@ public class UserDetailServiceImpl implements UserDetailService {
 
   @Override
   public Mono<UserDetails> getByUsername(String token) {
-    return securityClient.getUser(token)
+    return securityClient.getUser(BEARER_PREFIX + token)
       .map(RikserResponseItem::getData)
       .onErrorResume(e -> Mono.error(new EntityNotFoundException("Пользователь не найден")));
   }
