@@ -45,6 +45,9 @@ public class UserDetailServiceImpl implements UserDetailService {
         log.warn("user {}", response);
         return (UserDetails) response.getData();
       })
-      .onErrorResume(e -> Mono.error(new EntityNotFoundException("Пользователь не найден")));
+      .onErrorResume(e -> {
+        log.error("error", e);
+        return Mono.error(new EntityNotFoundException("Пользователь не найден"));
+      });
   }
 }
