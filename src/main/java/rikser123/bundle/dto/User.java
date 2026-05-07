@@ -1,5 +1,6 @@
 package rikser123.bundle.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements UserDetails {
   private UUID id;
   private String login;
@@ -38,8 +40,8 @@ public class User implements UserDetails {
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return privileges.stream()
-        .map(userPrivilege -> new SimpleGrantedAuthority(userPrivilege))
-        .toList();
+      .map(userPrivilege -> new SimpleGrantedAuthority(userPrivilege))
+      .toList();
   }
 
   @Override
