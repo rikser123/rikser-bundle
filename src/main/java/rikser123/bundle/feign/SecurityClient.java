@@ -3,6 +3,7 @@ package rikser123.bundle.feign;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Mono;
 import rikser123.bundle.dto.request.RikserRequestItem;
@@ -19,5 +20,5 @@ public interface SecurityClient {
     produces = MediaType.APPLICATION_JSON_VALUE,
     consumes = MediaType.APPLICATION_JSON_VALUE
   )
-  Mono<RikserResponseItem<UserDetails>> getUser(RikserRequestItem<UserGetDto> requestDto);
+  Mono<RikserResponseItem<UserDetails>> getUser(@RequestBody RikserRequestItem<UserGetDto> requestDto);
 }
