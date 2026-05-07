@@ -8,8 +8,6 @@ import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import rikser123.bundle.dto.request.RikserRequestItem;
-import rikser123.bundle.dto.request.UserGetDto;
 import rikser123.bundle.dto.response.RikserResponseItem;
 import rikser123.bundle.feign.SecurityClient;
 import rikser123.bundle.service.UserDetailService;
@@ -26,8 +24,8 @@ public class UserDetailServiceImpl implements UserDetailService {
   @Override
   public Mono<UserDetails> getCurrentUser() {
     return ReactiveSecurityContextHolder.getContext()
-        .map(SecurityContext::getAuthentication)
-        .map(data -> (UserDetails) data.getPrincipal());
+      .map(SecurityContext::getAuthentication)
+      .map(data -> (UserDetails) data.getPrincipal());
   }
 
   @Override
@@ -37,11 +35,8 @@ public class UserDetailServiceImpl implements UserDetailService {
 
   @Override
   public Mono<UserDetails> getByUsername(String token) {
-    var request = new RikserRequestItem<UserGetDto>();
-    request.setData(new UserGetDto(token));
-
-    return securityClient.getUser(request)
-        .map(RikserResponseItem::getData)
-        .onErrorResume(e -> Mono.error(new EntityNotFoundException("Пользователь не найден")));
+    return securityClient.getUser(token)
+      .map(RikserResponseItem::getData)
+      .onErrorResume(e -> Mono.error(new EntityNotFoundException("Пользователь не найден")));
   }
 }
