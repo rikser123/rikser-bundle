@@ -47,8 +47,6 @@ val mockitoAgent = configurations.create("mockitoAgent")
 
 dependencies {
     api("org.springframework.boot:spring-boot-starter-data-jpa")
-    api("org.springframework.boot:spring-boot-starter-data-rest")
-    api("org.springframework.boot:spring-boot-starter-web")
     api("org.springframework.boot:spring-boot-starter-validation:3.5.6")
     api("org.mapstruct:mapstruct:1.5.5.Final")
     api("org.liquibase:liquibase-core")
@@ -60,7 +58,6 @@ dependencies {
     api("com.playtika.reactivefeign:feign-reactor-core:4.2.0")
     api("com.playtika.reactivefeign:feign-reactor-webclient:4.2.0")
     api("com.playtika.reactivefeign:feign-reactor-spring-configuration:4.2.0")
-
 
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
