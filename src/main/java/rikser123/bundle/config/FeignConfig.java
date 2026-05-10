@@ -12,7 +12,7 @@ import rikser123.bundle.feign.SecurityClient;
 @Configuration
 @EnableConfigurationProperties(MaskedProperties.class)
 public class FeignConfig {
-  @Value("${security.service.url}")
+  @Value("${bundle.security.service.url}")
   private String securityServiceUrl;
 
   @Bean
