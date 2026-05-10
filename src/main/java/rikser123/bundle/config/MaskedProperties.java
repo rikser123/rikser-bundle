@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @ConfigurationProperties(prefix = "bundle.logging")
@@ -37,7 +38,9 @@ public class MaskedProperties {
   public Set<String> getHeaders() {
     var headers = new HashSet<String>();
     headers.addAll(MASKED_HEADERS);
-    headers.addAll(maskedHeaders);
+    if (!Objects.isNull(maskedHeaders)) {
+      headers.addAll(maskedHeaders);
+    }
 
     return headers;
   }
@@ -45,7 +48,10 @@ public class MaskedProperties {
   public Set<String> getProperties() {
     var properties = new HashSet<String>();
     properties.addAll(MASKED_PROPERTIES);
-    properties.addAll(maskedProperties);
+    
+    if (!Objects.isNull(maskedProperties)) {
+      properties.addAll(maskedProperties);
+    }
 
     return properties;
   }
