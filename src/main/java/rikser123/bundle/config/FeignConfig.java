@@ -1,8 +1,10 @@
 package rikser123.bundle.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.Contract;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactivefeign.webclient.WebReactiveFeign;
@@ -25,5 +27,10 @@ public class FeignConfig {
     return WebReactiveFeign.<SecurityClient>builder()
       .addLoggerListener(logger)
       .target(SecurityClient.class, securityServiceUrl);
+  }
+
+  @Bean
+  public Contract feignContract() {
+    return new SpringMvcContract();
   }
 }
