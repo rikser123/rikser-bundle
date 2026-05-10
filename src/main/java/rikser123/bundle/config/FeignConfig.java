@@ -25,6 +25,7 @@ public class FeignConfig {
   @Bean
   public SecurityClient securityClient(ReactiveFeignLoggingListener logger) {
     return WebReactiveFeign.<SecurityClient>builder()
+      .contract(feignContract())
       .addLoggerListener(logger)
       .target(SecurityClient.class, securityServiceUrl);
   }
