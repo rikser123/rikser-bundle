@@ -31,11 +31,11 @@ import java.util.List;
 
 @Configuration
 public class SecurityConfig {
-  @Value("${security.service.url}")
+  @Value("${bundle.security.service.url}")
   private String securityHost;
 
   @Bean
-  @ConditionalOnProperty(name = "security.enabled", havingValue = "true", matchIfMissing = true)
+  @ConditionalOnProperty(name = "bundle.security.enabled", havingValue = "true", matchIfMissing = true)
   public SecurityWebFilterChain securityWebFilterChain(
     ServerHttpSecurity http,
     ReactiveAuthenticationManager reactiveAuthenticationManager,
@@ -72,7 +72,7 @@ public class SecurityConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "security.enabled", havingValue = "true", matchIfMissing = true)
+  @ConditionalOnProperty(name = "bundle.security.enabled", havingValue = "true", matchIfMissing = true)
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
 
@@ -94,7 +94,7 @@ public class SecurityConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "security.enabled", havingValue = "true", matchIfMissing = true)
+  @ConditionalOnProperty(name = "bundle.security.enabled", havingValue = "true", matchIfMissing = true)
   public ReactiveAuthenticationManager reactiveAuthenticationManager(
     PasswordEncoder passwordEncoder, UserDetailService userDetailService) {
     UserDetailsRepositoryReactiveAuthenticationManager manager =
@@ -112,7 +112,7 @@ public class SecurityConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "security.service.enabled", havingValue = "true", matchIfMissing = true)
+  @ConditionalOnProperty(name = "bundle.security.service.enabled", havingValue = "true", matchIfMissing = true)
   public UserDetailService userDetailService(SecurityClient securityClient) {
     return new UserDetailServiceImpl(securityClient);
   }

@@ -58,6 +58,8 @@ dependencies {
     api("com.playtika.reactivefeign:feign-reactor-core:4.2.0")
     api("com.playtika.reactivefeign:feign-reactor-webclient:4.2.0")
     api("com.playtika.reactivefeign:feign-reactor-spring-configuration:4.2.0")
+    api("io.micrometer:micrometer-tracing-bridge-brave")
+    api("io.micrometer:context-propagation")
 
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")

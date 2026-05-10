@@ -14,6 +14,13 @@ import reactivefeign.spring.config.EnableReactiveFeignClients;
 @EnableReactiveFeignClients
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
-@Import({JaksonConfig.class, SecurityConfig.class, ComponentConfig.class})
+@Import({
+  JaksonConfig.class,
+  SecurityConfig.class,
+  ComponentConfig.class,
+  ReactorContextConfig.class,
+  LoggingConfig.class,
+  FeignConfig.class
+})
 public class BundleAutoConfiguration {
 }

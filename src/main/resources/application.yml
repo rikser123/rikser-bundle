@@ -1,8 +1,15 @@
 spring:
   application:
     name: rikser-bundle
-security:
-  enabled: true
-  service:
+
+bundle:
+  logging:
+    masked-headers:
+      - Authorization
+    masked-properties:
+      - password
+  security:
     enabled: true
-    url: http://localhost:8081
+    service:
+      enabled: true
+      url: http://localhost:8081
