@@ -36,7 +36,6 @@ public class SecurityConfig {
     JwtAuthenticationFilter jwtAuthenticationFilter
   ) throws Exception {
     return http
-      .securityMatcher("/api/**", "/swagger-ui/**", "/swagger-resources/**")
       .csrf(csrf -> csrf.disable())
       .authenticationManager(authenticationManager)
       .httpBasic(httpBasic -> httpBasic.disable())
