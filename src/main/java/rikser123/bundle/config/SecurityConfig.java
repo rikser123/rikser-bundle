@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -28,7 +27,6 @@ import java.util.List;
 public class SecurityConfig {
   @Bean
   @ConditionalOnProperty(name = "bundle.security.enabled", havingValue = "true", matchIfMissing = true)
-  @Primary
   @Order(-1)
   public SecurityFilterChain securityFilterChain(
     HttpSecurity http,
@@ -36,6 +34,7 @@ public class SecurityConfig {
     JwtAuthenticationFilter jwtAuthenticationFilter
   ) throws Exception {
     return http
+      .securityMatcher("/api/**", "/swagger-ui/**")
       .csrf(csrf -> csrf.disable())
       .authenticationManager(authenticationManager)
       .httpBasic(httpBasic -> httpBasic.disable())
@@ -43,7 +42,7 @@ public class SecurityConfig {
       .anonymous(anonymous -> anonymous.disable())
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers("/api/v1/user/register", "/api/v1/user/login").permitAll()
-        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/v3/api-docs/**", "/webjars/**").permitAll()
+        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**").permitAll()
         .anyRequest().authenticated()
       )
       .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
