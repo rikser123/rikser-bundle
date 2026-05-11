@@ -20,6 +20,7 @@ import rikser123.bundle.service.UserDetailService;
 @RequiredArgsConstructor
 @Slf4j
 public class UserDetailServiceImpl implements UserDetailService {
+  public static final String BEARER_PREFIX = "Bearer ";
   private final SecurityClient securityClient;
 
   @Override
@@ -36,8 +37,14 @@ public class UserDetailServiceImpl implements UserDetailService {
 
   @Override
   public Mono<UserDetails> getByUsername(String token) {
-    return securityClient.getUser()
-      .map(response -> (UserDetails) response.getData())
+    return securityClient.getUser(BEARER_PREFIX + token)
+      .doOnNext(sys -> {
+        log.warn("sys {}", sys);
+      })
+      .map(response -> {
+        log.warn("user {}", response);
+        return (UserDetails) response.getData();
+      })
       .onErrorResume(e -> {
         log.error("error", e);
         return Mono.error(new EntityNotFoundException("Пользователь не найден"));

@@ -57,7 +57,7 @@ public class FeignConfig {
   ) {
     return WebReactiveFeign.<SecurityClient>builder()
       .contract(feignContract())
-      .addRequestInterceptor(authInterceptor)
+//      .addRequestInterceptor(authInterceptor)
       .addLoggerListener(logger)
       .target(SecurityClient.class, securityServiceUrl);
   }
