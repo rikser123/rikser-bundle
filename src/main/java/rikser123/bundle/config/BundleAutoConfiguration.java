@@ -19,7 +19,7 @@ import reactivefeign.spring.config.EnableReactiveFeignClients;
   SecurityConfig.class,
   ComponentConfig.class,
   ReactorContextConfig.class,
-  LoggingConfig.class,
+
   FeignConfig.class
 })
 public class BundleAutoConfiguration {

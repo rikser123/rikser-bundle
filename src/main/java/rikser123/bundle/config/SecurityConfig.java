@@ -62,7 +62,7 @@ public class SecurityConfig {
             .pathMatchers("/actuator/health", "/actuator/info")
             .permitAll()
             .anyExchange()
-            .authenticated())
+            .permitAll())
       .addFilterBefore(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
       .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint))
       .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
