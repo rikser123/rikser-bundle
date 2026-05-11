@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -33,6 +32,7 @@ public class SecurityConfig {
     JwtAuthenticationFilter jwtAuthenticationFilter
   ) throws Exception {
     return http
+      .securityMatcher("/**")
       .csrf(csrf -> csrf.disable())
       .authenticationManager(authenticationManager)
       .httpBasic(httpBasic -> httpBasic.disable())
@@ -73,11 +73,11 @@ public class SecurityConfig {
   @Bean
   @ConditionalOnProperty(name = "bundle.security.enabled", havingValue = "true", matchIfMissing = true)
   public AuthenticationManager authenticationManager(
-    PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+    PasswordEncoder passwordEncoder, UserDetailService userDetailsService) {
 
     var provider = new DaoAuthenticationProvider();
     provider.setPasswordEncoder(passwordEncoder);
-    provider.setUserDetailsService(userDetailsService);
+    provider.setUserDetailsService(userDetailsService.userDetailsService());
 
     return provider::authenticate;
   }
