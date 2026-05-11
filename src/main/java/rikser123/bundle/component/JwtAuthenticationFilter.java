@@ -61,6 +61,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   ) throws IOException, ServletException {
     var authHeader = request.getHeader(HEADER_NAME);
 
+    log.warn("auth header {}", authHeader);
+
     if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith(BEARER_PREFIX)) {
       filterChain.doFilter(request, response);
       return;
@@ -71,6 +73,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     try {
       var userDetails = userService.getByUsername(token);
       var authentication = createAuthenticationToken(userDetails);
+      log.warn("authentication {}", authentication);
+
       SecurityContextHolder.getContext().setAuthentication(authentication);
       filterChain.doFilter(request, response);
     } catch (MalformedJwtException e) {
