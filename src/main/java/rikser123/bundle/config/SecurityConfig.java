@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,6 +29,7 @@ public class SecurityConfig {
   @Bean
   @ConditionalOnProperty(name = "bundle.security.enabled", havingValue = "true", matchIfMissing = true)
   @Primary
+  @Order(-1)
   public SecurityFilterChain securityFilterChain(
     HttpSecurity http,
     AuthenticationManager authenticationManager,
