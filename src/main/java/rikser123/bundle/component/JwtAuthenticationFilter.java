@@ -23,8 +23,6 @@ import rikser123.bundle.utils.RikserResponseUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Фильтр аутентификации JWT для Spring WebFlux Security
@@ -37,21 +35,10 @@ public class JwtAuthenticationFilter implements WebFilter {
   public static final String HEADER_NAME = "Authorization";
   private final UserDetailService userService;
   private final ObjectMapper objectMapper;
-  private final Map<String, Boolean> processedRequests = new ConcurrentHashMap<>();
 
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-    var requestId = exchange.getRequest().getId();
-
-    if (processedRequests.putIfAbsent(requestId, true) != null) {
-      return chain.filter(exchange);
-    }
-
-    return authenticate(exchange, chain)
-      .doFinally(
-        signal -> {
-          processedRequests.remove(requestId);
-        });
+    return authenticate(exchange, chain);
   }
 
   /**
