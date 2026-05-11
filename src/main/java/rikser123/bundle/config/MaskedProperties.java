@@ -17,7 +17,7 @@ import java.util.Set;
 @Getter
 @Setter
 public class MaskedProperties {
-  private static final List<String> MASKED_HEADERS = List.of("Authorization");
+  private static final List<String> MASKED_HEADERS = List.of();
   private static final List<String> MASKED_PROPERTIES = List.of(
     "login",
     "password",
