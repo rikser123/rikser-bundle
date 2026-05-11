@@ -2,6 +2,7 @@ package rikser123.bundle.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Contract;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @Configuration
 @EnableConfigurationProperties(MaskedProperties.class)
+@Slf4j
 public class FeignConfig {
   @Value("${bundle.security.service.url}")
   private String securityServiceUrl;
@@ -33,6 +35,7 @@ public class FeignConfig {
   @Bean(name = "AuthInterceptor")
   public ReactiveHttpRequestInterceptor authInterceptor() {
     return ((ReactiveHttpRequest request) -> Mono.deferContextual(context -> {
+      log.warn("Auth {}", context.get("Authorization").toString());
       if (StringUtils.isNotEmpty(context.get("Authorization"))) {
         request.headers().put("Authorization", List.of(context.get("Authorization").toString()));
 
