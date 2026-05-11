@@ -39,6 +39,12 @@ configurations {
     }
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2024.0.1")
+    }
+}
+
 repositories {
     mavenCentral()
 }
@@ -54,10 +60,8 @@ dependencies {
     api("io.jsonwebtoken:jjwt:0.13.0")
     api("org.springframework.boot:spring-boot-starter-security")
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
-    api("org.springframework.boot:spring-boot-starter-webflux")
-    api("com.playtika.reactivefeign:feign-reactor-core:4.2.0")
-    api("com.playtika.reactivefeign:feign-reactor-webclient:4.2.0")
-    api("com.playtika.reactivefeign:feign-reactor-spring-configuration:4.2.0")
+    api("org.springframework.boot:spring-boot-starter-web")
+    api("org.springframework.cloud:spring-cloud-starter-openfeign")
     api("io.micrometer:micrometer-tracing-bridge-brave")
     api("io.micrometer:context-propagation")
 

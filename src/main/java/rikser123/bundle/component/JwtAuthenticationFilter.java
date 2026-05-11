@@ -3,6 +3,10 @@ package rikser123.bundle.component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -10,114 +14,106 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
-import reactor.core.publisher.Mono;
+import org.springframework.web.filter.OncePerRequestFilter;
 import rikser123.bundle.dto.User;
 import rikser123.bundle.service.UserDetailService;
 import rikser123.bundle.utils.RikserResponseUtils;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
- * Фильтр аутентификации JWT для Spring WebFlux Security
+ * Фильтр аутентификации JWT для Spring Security (синхронная версия)
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JwtAuthenticationFilter implements WebFilter {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
   public static final String BEARER_PREFIX = "Bearer ";
   public static final String HEADER_NAME = "Authorization";
   private final UserDetailService userService;
   private final ObjectMapper objectMapper;
 
   @Override
-  public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-    return authenticate(exchange, chain);
+  protected void doFilterInternal(
+    HttpServletRequest request,
+    HttpServletResponse response,
+    FilterChain filterChain
+  ) throws ServletException, IOException {
+    try {
+      authenticate(request, response, filterChain);
+    } catch (Exception e) {
+      sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Ошибка валидации токена", e);
+    }
   }
 
   /**
    * Обработка json web token
-   *
-   * @param exchange Запрос
-   * @param chain    Фильтры spring security
    */
-  private Mono<Void> authenticate(ServerWebExchange exchange, WebFilterChain chain) {
-    var authHeader = exchange.getRequest().getHeaders().getFirst(HEADER_NAME);
+  private void authenticate(
+    HttpServletRequest request,
+    HttpServletResponse response,
+    FilterChain filterChain
+  ) throws IOException, ServletException {
+    var authHeader = request.getHeader(HEADER_NAME);
 
     if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith(BEARER_PREFIX)) {
-      return chain.filter(exchange);
+      filterChain.doFilter(request, response);
+      return;
     }
 
     var token = authHeader.substring(BEARER_PREFIX.length());
 
-    return userService
-      .getByUsername(token)
-      .flatMap(
-        userDetails -> {
-          var authentication = createAuthenticationToken(userDetails);
-          return chain
-            .filter(exchange)
-            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
-        })
-      .switchIfEmpty(chain.filter(exchange))
-      .onErrorResume(
-        MalformedJwtException.class,
-        e ->
-          sendErrorResponse(
-            exchange, HttpStatus.BAD_REQUEST, "Некорректный формат JWT токена", e))
-      .onErrorResume(
-        ExpiredJwtException.class,
-        e ->
-          sendErrorResponse(
-            exchange, HttpStatus.BAD_REQUEST, "Срок действия токена истек", e))
-      .onErrorResume(
-        Exception.class,
-        e -> sendErrorResponse(exchange, HttpStatus.BAD_REQUEST, "Ошибка валидации токена", e));
+    try {
+      var userDetails = userService.getByUsername(token);
+      var authentication = createAuthenticationToken(userDetails);
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+      filterChain.doFilter(request, response);
+    } catch (MalformedJwtException e) {
+      log.warn("Некорректный формат JWT токена", e);
+      sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Некорректный формат JWT токена", e);
+    } catch (ExpiredJwtException e) {
+      log.warn("Срок действия токена истек", e);
+      sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Срок действия токена истек", e);
+    } catch (Exception e) {
+      log.warn("Ошибка валидации токена", e);
+      sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Ошибка валидации токена", e);
+    }
   }
 
   /**
    * Обработка ошибок токена
-   *
-   * @param exchange Запрос
-   * @param status   Статус запроса
-   * @param message  Сообщение об ошибке
    */
-  private Mono<Void> sendErrorResponse(
-    ServerWebExchange exchange, HttpStatus status, String message, Exception e) {
+  private void sendErrorResponse(
+    HttpServletResponse response,
+    HttpStatus status,
+    String message,
+    Exception e
+  ) throws IOException {
     log.warn("ERROR JWT token {}", message, e);
 
-    return Mono.fromCallable(
-        () -> {
-          exchange.getResponse().setStatusCode(status);
-          exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+    try {
+      var responseBody = RikserResponseUtils.createResponse(message, status);
+      var jsonText = objectMapper.writer().writeValueAsString(responseBody);
+      var bytes = jsonText.getBytes(StandardCharsets.UTF_8);
 
-          var responseBody = RikserResponseUtils.createResponse(message, status);
+      response.setStatus(status.value());
+      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+      response.getOutputStream().write(bytes);
 
-          var jsonText = objectMapper.writer().writeValueAsString(responseBody);
-          var bytes = jsonText.getBytes(StandardCharsets.UTF_8);
-          return exchange.getResponse().bufferFactory().wrap(bytes);
-        })
-      .flatMap(buffer -> exchange.getResponse().writeWith(Mono.just(buffer)))
-      .onErrorResume(
-        ex -> {
-          log.error("Error writing authentication error response", ex);
+    } catch (Exception ex) {
+      log.error("Error writing authentication error response", ex);
 
-          // Fallback: простой текст в случае ошибки
-          var errorMessage = "{\"error\":\"Authentication failed\"}";
-          var buffer =
-            exchange
-              .getResponse()
-              .bufferFactory()
-              .wrap(errorMessage.getBytes(StandardCharsets.UTF_8));
-
-          return exchange.getResponse().writeWith(Mono.just(buffer));
-        });
+      // Fallback: простой текст в случае ошибки
+      var errorMessage = "{\"error\":\"Authentication failed\"}";
+      response.setStatus(HttpStatus.BAD_REQUEST.value());
+      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+      response.getOutputStream().write(errorMessage.getBytes(StandardCharsets.UTF_8));
+    }
   }
 
   /**
@@ -125,14 +121,10 @@ public class JwtAuthenticationFilter implements WebFilter {
    */
   private UsernamePasswordAuthenticationToken createAuthenticationToken(UserDetails userDetails) {
     var user = (User) userDetails;
-    List<SimpleGrantedAuthority> authorities =
-      user.getPrivileges().stream()
-        .map(privilege -> new SimpleGrantedAuthority(privilege))
-        .toList();
+    List<SimpleGrantedAuthority> authorities = user.getPrivileges().stream()
+      .map(SimpleGrantedAuthority::new)
+      .toList();
 
-    return new UsernamePasswordAuthenticationToken(
-      user,
-      null, // credentials - обычно null для JWT
-      authorities);
+    return new UsernamePasswordAuthenticationToken(user, null, authorities);
   }
 }

@@ -1,8 +1,7 @@
 package rikser123.bundle.service;
 
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
-import reactor.core.publisher.Mono;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
  * Интерфейс для взаимодейтвия с польльзователями
@@ -13,14 +12,14 @@ public interface UserDetailService {
    *
    * @return Пользователь
    */
-  Mono<UserDetails> getCurrentUser();
+  UserDetails getCurrentUser();
 
   /**
    * Метод получения сервиса пользователей для контекста безопасности  *
    *
    * @return Сервис пользователей
    */
-  ReactiveUserDetailsService userDetailsService();
+  UserDetailsService userDetailsService();
 
   /**
    * Метод получения пользователя из security  *
@@ -28,5 +27,5 @@ public interface UserDetailService {
    * @param token Токен безопасности из запроса
    * @return Сервис пользователей
    */
-  Mono<UserDetails> getByUsername(String token);
+  UserDetails getByUsername(String token);
 }
