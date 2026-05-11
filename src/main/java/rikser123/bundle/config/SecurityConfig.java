@@ -34,6 +34,7 @@ public class SecurityConfig {
     JwtAuthenticationFilter jwtAuthenticationFilter
   ) throws Exception {
     return http
+      .securityMatcher("/api/**", "/swagger-ui/**", "/swagger-resources/**")
       .csrf(csrf -> csrf.disable())
       .authenticationManager(authenticationManager)
       .httpBasic(httpBasic -> httpBasic.disable())
@@ -42,7 +43,6 @@ public class SecurityConfig {
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers("/api/v1/user/register", "/api/v1/user/login").permitAll()
         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/v3/api-docs/**", "/webjars/**").permitAll()
-        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
         .anyRequest().authenticated()
       )
       .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
