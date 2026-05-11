@@ -36,6 +36,7 @@ public class SecurityConfig {
       .authenticationManager(authenticationManager)
       .httpBasic(httpBasic -> httpBasic.disable())
       .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+      .anonymous(anonymous -> anonymous.disable())
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers("/api/v1/user/register", "/api/v1/user/login").permitAll()
         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/v3/api-docs/**", "/webjars/**").permitAll()
