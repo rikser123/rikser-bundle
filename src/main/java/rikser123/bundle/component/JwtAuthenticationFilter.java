@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +33,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Primary
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
   public static final String BEARER_PREFIX = "Bearer ";
   public static final String HEADER_NAME = "Authorization";
@@ -61,8 +63,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   ) throws IOException, ServletException {
     var authHeader = request.getHeader(HEADER_NAME);
 
-    log.warn("auth header {}", authHeader);
-
     if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith(BEARER_PREFIX)) {
       filterChain.doFilter(request, response);
       return;
@@ -71,11 +71,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     var token = authHeader.substring(BEARER_PREFIX.length());
 
     try {
-      var userDetails = userService.getByUsername(token);
-      var authentication = createAuthenticationToken(userDetails);
-      log.warn("authentication {}", authentication);
+      if (SecurityContextHolder.getContext().getAuthentication() == null) {
+        var context = SecurityContextHolder.createEmptyContext();
+        var userDetails = userService.getByUsername(token);
+        var authentication = createAuthenticationToken(userDetails);
+        context.setAuthentication(authentication);
 
-      SecurityContextHolder.getContext().setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+      }
+
       filterChain.doFilter(request, response);
     } catch (MalformedJwtException e) {
       log.warn("Некорректный формат JWT токена", e);

@@ -4,13 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.context.SecurityContextHolderFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -26,6 +27,7 @@ import java.util.List;
 public class SecurityConfig {
   @Bean
   @ConditionalOnProperty(name = "bundle.security.enabled", havingValue = "true", matchIfMissing = true)
+  @Primary
   public SecurityFilterChain securityFilterChain(
     HttpSecurity http,
     AuthenticationManager authenticationManager,
@@ -43,14 +45,13 @@ public class SecurityConfig {
         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
         .anyRequest().authenticated()
       )
-      .addFilterAfter(jwtAuthenticationFilter, SecurityContextHolderFilter.class)
+      .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
       .formLogin(form -> form.disable())
       .logout(logout -> logout.disable())
       .build();
   }
 
   @Bean
-  @ConditionalOnProperty(name = "bundle.security.enabled", havingValue = "true", matchIfMissing = true)
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
 
@@ -82,6 +83,7 @@ public class SecurityConfig {
     return provider::authenticate;
   }
 
+  @ConditionalOnProperty(name = "bundle.security.enabled", havingValue = "true", matchIfMissing = true)
   @Bean
   public JwtAuthenticationFilter jwtAuthenticationFilter(
     UserDetailService userDetailService,
