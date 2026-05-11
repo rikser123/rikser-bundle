@@ -17,6 +17,8 @@ import rikser123.bundle.component.ContextFilter;
 import rikser123.bundle.component.ReactiveFeignLoggingListener;
 import rikser123.bundle.feign.SecurityClient;
 
+import java.util.List;
+
 @Configuration
 @EnableConfigurationProperties(MaskedProperties.class)
 public class FeignConfig {
@@ -32,7 +34,7 @@ public class FeignConfig {
   public ReactiveHttpRequestInterceptor authInterceptor() {
     return ((ReactiveHttpRequest request) -> Mono.deferContextual(context -> {
       if (StringUtils.isNotEmpty(context.get("Authorization"))) {
-        request.headers().put("Authorization", context.get("Authorization"));
+        request.headers().put("Authorization", List.of(context.get("Authorization").toString()));
 
       }
 

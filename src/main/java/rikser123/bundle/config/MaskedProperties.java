@@ -29,7 +29,8 @@ public class MaskedProperties {
     "isAccountNonExpired",
     "isAccountNonLocked",
     "isCredentialsNonExpired",
-    "isEnabled"
+    "isEnabled",
+    "token"
   );
 
   private List<String> maskedHeaders;
@@ -48,7 +49,7 @@ public class MaskedProperties {
   public Set<String> getProperties() {
     var properties = new HashSet<String>();
     properties.addAll(MASKED_PROPERTIES);
-    
+
     if (!Objects.isNull(maskedProperties)) {
       properties.addAll(maskedProperties);
     }
