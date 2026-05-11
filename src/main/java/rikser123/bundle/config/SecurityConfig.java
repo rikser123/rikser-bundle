@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import rikser123.bundle.component.JwtAuthenticationFilter;
 import rikser123.bundle.feign.SecurityClient;
 import rikser123.bundle.service.UserDetailService;
@@ -55,15 +55,14 @@ public class SecurityConfig {
     CorsConfiguration configuration = new CorsConfiguration();
 
     configuration.setAllowedOriginPatterns(List.of("*"));
-    configuration.setAllowedMethods(
-      Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
     configuration.setAllowedHeaders(List.of("*"));
     configuration.setAllowCredentials(true);
-    configuration.setMaxAge(3600L); // 1 час кэширования preflight запросов
+    configuration.setMaxAge(3600L);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
-    return (CorsConfigurationSource) source;
+    return source;
   }
 
   @Bean
