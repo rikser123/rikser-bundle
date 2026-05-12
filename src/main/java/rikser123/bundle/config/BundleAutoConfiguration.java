@@ -20,6 +20,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
   JaksonConfig.class,
   SecurityConfig.class,
   ComponentConfig.class,
+  FeignConfig.class
 })
 public class BundleAutoConfiguration {
 }

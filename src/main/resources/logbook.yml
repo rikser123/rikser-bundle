@@ -18,9 +18,9 @@ logbook:
       - privileges
       - authorities
       - username
-      - isAccountNonExpired
-      - isAccountNonLocked
-      - isCredentialsNonExpired
-      - isEnabled
+      - accountNonExpired
+      - accountNonLocked
+      - credentialsNonExpired
+      - enabled
   write:
     max-body-size: 100000

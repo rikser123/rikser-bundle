@@ -38,7 +38,7 @@ public class UserDetailServiceImpl implements UserDetailService {
   @Override
   public UserDetails getByUsername(String token) {
     try {
-      var response = securityClient.getUser(BEARER_PREFIX + token);
+      var response = securityClient.getUser();
       return response.getData();
     } catch (Exception e) {
       log.error("error", e);
