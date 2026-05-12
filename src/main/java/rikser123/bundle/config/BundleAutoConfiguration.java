@@ -13,7 +13,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
  */
 
 @AutoConfiguration
-@EnableFeignClients
+@EnableFeignClients(basePackages = "rikser123.bundle.feign")
 @EnableMethodSecurity
 @AutoConfigureBefore({SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class})
 @Import({
