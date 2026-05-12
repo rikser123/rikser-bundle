@@ -63,7 +63,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-web")
     api("org.springframework.cloud:spring-cloud-starter-openfeign")
     api("io.micrometer:micrometer-tracing-bridge-brave")
-    api("io.micrometer:context-propagation:1.3.0")
+    api("io.micrometer:context-propagation")
     api("org.springframework.boot:spring-boot-starter-actuator")
     api("org.zalando:logbook-spring-boot-starter:4.0.4")
 
