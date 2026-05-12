@@ -20,10 +20,6 @@ public class FeignConfig {
       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
       String token = null;
 
-      log.warn("auth {}", authentication);
-      log.warn("mdc {}", MDC.get("token"));
-
-
       if (authentication != null && authentication.getDetails() instanceof String autoToken) {
         token = autoToken;
       }
