@@ -1,0 +1,26 @@
+logging:
+  level:
+    org.zalando.logbook: TRACE
+
+logbook:
+  format:
+    style: json
+  obfuscate:
+    headers:
+      - Authorization
+      - Cookie
+      - X-Auth-Token
+    json-body-fields:
+      - password
+      - email
+      - token
+      - login
+      - privileges
+      - authorities
+      - username
+      - isAccountNonExpired
+      - isAccountNonLocked
+      - isCredentialsNonExpired
+      - isEnabled
+  write:
+    max-body-size: 100000
