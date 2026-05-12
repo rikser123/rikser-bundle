@@ -21,7 +21,7 @@ public interface SecurityClient {
   RikserResponseItem<User> getUser();
 
   @GetMapping(
-    value = "/api/v1/user/token/refresh/{id}",
+    value = "/api/v1/user/token/refresh",
     produces = MediaType.APPLICATION_JSON_VALUE,
     consumes = MediaType.APPLICATION_JSON_VALUE
   )
