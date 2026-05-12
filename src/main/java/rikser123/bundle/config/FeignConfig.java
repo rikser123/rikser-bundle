@@ -15,7 +15,7 @@ public class FeignConfig {
   public RequestInterceptor authorizationHeaderInterceptor() {
     return template -> {
       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      log.warn("auth", authentication);
+      log.warn("auth {}", authentication);
 
       if (authentication != null && authentication.getDetails() instanceof String token) {
         template.header("Authorization", "Bearer " + token);
