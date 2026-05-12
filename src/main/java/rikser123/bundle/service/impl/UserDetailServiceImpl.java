@@ -18,7 +18,6 @@ import rikser123.bundle.service.UserDetailService;
 @RequiredArgsConstructor
 @Slf4j
 public class UserDetailServiceImpl implements UserDetailService {
-  public static final String BEARER_PREFIX = "Bearer ";
   private final SecurityClient securityClient;
 
   @Override
@@ -43,6 +42,17 @@ public class UserDetailServiceImpl implements UserDetailService {
     } catch (Exception e) {
       log.error("error", e);
       throw new EntityNotFoundException("Пользователь не найден");
+    }
+  }
+
+  @Override
+  public String updateToken(String refreshToken) {
+    try {
+      var response = securityClient.updateToken();
+      return response.getData().getToken();
+    } catch (Exception e) {
+      log.error("Не удалось обновить токен", e);
+      throw new IllegalStateException("Не удалось обновить токен");
     }
   }
 }

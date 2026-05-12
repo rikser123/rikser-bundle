@@ -28,4 +28,11 @@ public interface UserDetailService {
    * @return Сервис пользователей
    */
   UserDetails getByUsername(String token);
+
+  /**
+   * Метод обновления токена  *
+   *
+   * @return Токен доступа
+   */
+  String updateToken(String refreshToken);
 }

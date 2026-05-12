@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import rikser123.bundle.dto.TokenDto;
 import rikser123.bundle.dto.User;
 import rikser123.bundle.service.UserDetailService;
 import rikser123.bundle.utils.RikserResponseUtils;
@@ -38,6 +39,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
   public static final String BEARER_PREFIX = "Bearer ";
   public static final String HEADER_NAME = "Authorization";
+  public static final String HEADER_REFRESH_NAME = "X-Refresh-Token";
   private final UserDetailService userService;
   private final ObjectMapper objectMapper;
 
@@ -70,16 +72,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     var token = authHeader.substring(BEARER_PREFIX.length());
+    var refreshToken = request.getHeader(HEADER_REFRESH_NAME);
     MDC.put("token", token);
+    MDC.put("refreshToken", refreshToken);
 
     try {
       if (SecurityContextHolder.getContext().getAuthentication() == null) {
-        var context = SecurityContextHolder.createEmptyContext();
-        var userDetails = userService.getByUsername(token);
-        var authentication = createAuthenticationToken(userDetails);
-        context.setAuthentication(authentication);
-
-        SecurityContextHolder.setContext(context);
+        createSecurityContext(token, refreshToken);
       }
 
       filterChain.doFilter(request, response);
@@ -88,12 +87,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Некорректный формат JWT токена", e);
     } catch (ExpiredJwtException e) {
       log.warn("Срок действия токена истек", e);
-      sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Срок действия токена истек", e);
+
+      try {
+        if (StringUtils.isNotEmpty(refreshToken)) {
+          var newAccessToken = userService.updateToken(refreshToken);
+          createSecurityContext(newAccessToken, refreshToken);
+        } else {
+          sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Срок действия токена истек", e);
+        }
+      } catch (Exception ex) {
+        sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Срок действия токена истек", ex);
+      }
     } catch (Exception e) {
       log.warn("Ошибка валидации токена", e);
       sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Ошибка валидации токена", e);
     } finally {
       MDC.remove("token");
+      MDC.remove("refreshToken");
     }
   }
 
@@ -138,5 +148,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       .toList();
 
     return new UsernamePasswordAuthenticationToken(user, null, authorities);
+  }
+
+  private void createSecurityContext(String token, String refreshToken) {
+    var context = SecurityContextHolder.createEmptyContext();
+    var userDetails = userService.getByUsername(token);
+    var authentication = createAuthenticationToken(userDetails);
+
+    var tokenDto = new TokenDto();
+    tokenDto.setAccessToken(token);
+    tokenDto.setRefreshToken(refreshToken);
+    authentication.setDetails(tokenDto);
+
+    context.setAuthentication(authentication);
+
+    SecurityContextHolder.setContext(context);
   }
 }
