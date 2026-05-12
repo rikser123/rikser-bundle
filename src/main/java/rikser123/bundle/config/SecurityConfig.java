@@ -38,7 +38,7 @@ public class SecurityConfig {
       .cors(cors -> cors.configurationSource(corsConfigurationSource()))
       .anonymous(anonymous -> anonymous.disable())
       .authorizeHttpRequests(authorize -> authorize
-        .requestMatchers("/api/v1/user/register", "/api/v1/user/login", "/api/v1/user/token/refresh/**").permitAll()
+        .requestMatchers("/api/v1/user/register", "/api/v1/user/login", "/api/v1/user/token/refresh").permitAll()
         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**").permitAll()
         .requestMatchers("/actuator/**").permitAll()
         .anyRequest().authenticated()
