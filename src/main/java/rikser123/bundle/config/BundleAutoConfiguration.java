@@ -1,5 +1,6 @@
 package rikser123.bundle.config;
 
+import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -14,7 +15,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @AutoConfiguration
 @EnableFeignClients
 @EnableMethodSecurity
-@AutoConfigureBefore(SecurityAutoConfiguration.class)
+@AutoConfigureBefore({SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class})
 @Import({
   JaksonConfig.class,
   SecurityConfig.class,

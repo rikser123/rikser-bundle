@@ -64,6 +64,7 @@ dependencies {
     api("org.springframework.cloud:spring-cloud-starter-openfeign")
     api("io.micrometer:micrometer-tracing-bridge-brave")
     api("io.micrometer:context-propagation")
+    api("org.springframework.boot:spring-boot-starter-actuator")
 
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
