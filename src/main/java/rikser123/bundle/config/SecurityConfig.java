@@ -27,14 +27,12 @@ import java.util.List;
 public class SecurityConfig {
   @Bean
   @ConditionalOnProperty(name = "bundle.security.enabled", havingValue = "true", matchIfMissing = true)
-  @Order(-1)
   public SecurityFilterChain securityFilterChain(
     HttpSecurity http,
     AuthenticationManager authenticationManager,
     JwtAuthenticationFilter jwtAuthenticationFilter
   ) throws Exception {
     return http
-      .securityMatcher("/api/**", "/swagger-ui/**")
       .csrf(csrf -> csrf.disable())
       .authenticationManager(authenticationManager)
       .httpBasic(httpBasic -> httpBasic.disable())
@@ -43,6 +41,7 @@ public class SecurityConfig {
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers("/api/v1/user/register", "/api/v1/user/login").permitAll()
         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**").permitAll()
+        .requestMatchers("/actuator/**").permitAll()
         .anyRequest().authenticated()
       )
       .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
