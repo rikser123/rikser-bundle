@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.MDC;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -69,13 +70,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     var token = authHeader.substring(BEARER_PREFIX.length());
+    MDC.put("token", token);
 
     try {
       if (SecurityContextHolder.getContext().getAuthentication() == null) {
         var context = SecurityContextHolder.createEmptyContext();
         var userDetails = userService.getByUsername(token);
         var authentication = createAuthenticationToken(userDetails);
-        authentication.setDetails(token);
         context.setAuthentication(authentication);
 
         SecurityContextHolder.setContext(context);
@@ -91,6 +92,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     } catch (Exception e) {
       log.warn("Ошибка валидации токена", e);
       sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Ошибка валидации токена", e);
+    } finally {
+      MDC.remove("token");
     }
   }
 
