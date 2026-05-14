@@ -1,5 +1,6 @@
 plugins {
     `java-library`
+    `kotlin-dsl`
     id("org.springframework.boot") version "3.5.5"
     id("io.spring.dependency-management") version "1.1.7"
     `maven-publish`
@@ -27,6 +28,16 @@ configure<PublishingExtension> {
 group = "rikser123"
 description = "Bundle"
 
+
+gradlePlugin {
+    plugins {
+        create("commonConventions") {
+            id = "rikser123.common-conventions"
+            implementationClass = "rikser123.bundle.CommonConventionsPlugin"
+        }
+    }
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -52,6 +63,9 @@ repositories {
 val mockitoAgent = configurations.create("mockitoAgent")
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-gradle-plugin:3.5.5")
+    implementation("io.spring.dependency-management:io.spring.dependency-management.gradle.plugin:1.1.7")
+    
     api("org.springframework.boot:spring-boot-starter-data-jpa")
     api("org.springframework.boot:spring-boot-starter-validation:3.5.6")
     api("org.mapstruct:mapstruct:1.5.5.Final")
