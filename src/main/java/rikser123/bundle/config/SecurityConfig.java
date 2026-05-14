@@ -39,7 +39,7 @@ public class SecurityConfig {
       .anonymous(anonymous -> anonymous.disable())
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers("/api/v1/user/register", "/api/v1/user/login", "/api/v1/user/token/refresh").permitAll()
-        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**").permitAll()
+        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
         .requestMatchers("/actuator/**").permitAll()
         .anyRequest().authenticated()
       )
