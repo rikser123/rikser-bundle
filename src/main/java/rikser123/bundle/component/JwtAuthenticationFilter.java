@@ -92,6 +92,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.isNotEmpty(refreshToken)) {
           var newAccessToken = userService.updateToken(refreshToken);
           createSecurityContext(newAccessToken, refreshToken);
+          filterChain.doFilter(request, response);
         } else {
           sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Срок действия токена истек", e);
         }
