@@ -66,6 +66,8 @@ dependencies {
     api("io.micrometer:context-propagation")
     api("org.springframework.boot:spring-boot-starter-actuator")
     api("org.zalando:logbook-spring-boot-starter:4.0.4")
+    api("org.springframework.boot:spring-boot-starter-data-redis")
+
 
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
