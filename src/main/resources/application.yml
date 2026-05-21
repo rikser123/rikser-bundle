@@ -3,13 +3,12 @@ spring:
     name: rikser-bundle
 
 bundle:
-  logging:
-    masked-headers:
-      - Authorization
-    masked-properties:
-      - password
   security:
     enabled: true
     service:
       enabled: true
       url: http://localhost:8081
+  redis:
+    enabled: true
+    TTL: P1D
+    prefix: prefix

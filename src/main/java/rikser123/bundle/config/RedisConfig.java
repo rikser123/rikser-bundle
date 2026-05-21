@@ -13,7 +13,7 @@ import rikser123.bundle.service.impl.RedisCacheServiceImpl;
 
 @Configuration
 public class RedisConfig {
-  @ConditionalOnProperty(name = "bundle.security.enabled", havingValue = "true")
+  @ConditionalOnProperty(name = "bundle.redis.enabled", havingValue = "true")
   @Bean
   public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory factory, ObjectMapper objectMapper) {
     var template = new RedisTemplate<String, String>();
@@ -27,7 +27,7 @@ public class RedisConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "bundle.security.enabled", havingValue = "true")
+  @ConditionalOnProperty(name = "bundle.redis.enabled", havingValue = "true")
   public RedisCacheService redisCacheService(RedisTemplate<String, String> redisTemplate, ObjectMapper objectMapper) {
     return new RedisCacheServiceImpl(redisTemplate, objectMapper);
   }
