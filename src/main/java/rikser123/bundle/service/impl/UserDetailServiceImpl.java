@@ -1,6 +1,5 @@
 package rikser123.bundle.service.impl;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,13 +35,8 @@ public class UserDetailServiceImpl implements UserDetailService {
 
   @Override
   public UserDetails getByUsername(String token) {
-    try {
-      var response = securityClient.getUser();
-      return response.getData();
-    } catch (Exception e) {
-      log.error("error", e);
-      throw new EntityNotFoundException("Пользователь не найден");
-    }
+    var response = securityClient.getUser();
+    return response.getData();
   }
 
   @Override
