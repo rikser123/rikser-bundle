@@ -97,7 +97,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       if (INVALID_FORMAT_TOKEN_MESSAGE.equals(message)) {
         log.warn(INVALID_FORMAT_TOKEN_MESSAGE, ex);
         sendErrorResponse(response, HttpStatus.BAD_REQUEST, INVALID_FORMAT_TOKEN_MESSAGE, ex);
-      } else if (EXPIRED_TOKEN_MESSAGE.equals(message)) {
+      } else if (EXPIRED_TOKEN_MESSAGE.equals(message) || message.startsWith("JWT expired")) {
         log.warn(EXPIRED_TOKEN_MESSAGE, ex);
         updateAccessToken(refreshToken, request, response, filterChain, ex);
       } else {
