@@ -89,7 +89,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     } catch (ExpiredJwtException e) {
       log.warn(EXPIRED_TOKEN_MESSAGE, e);
       updateAccessToken(refreshToken, request, response, filterChain, e);
-    } catch (FeignException.BadRequest ex) {
+    } catch (FeignException.BadRequest | FeignException.InternalServerError ex) {
       var body = ex.contentUTF8();
       var node = objectMapper.readTree(body);
       var message = node.get("message").asText();
