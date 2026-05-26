@@ -1,6 +1,7 @@
 package rikser123.bundle.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
@@ -37,9 +38,13 @@ import java.util.List;
 @Slf4j
 @Primary
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-  public static final String BEARER_PREFIX = "Bearer ";
-  public static final String HEADER_NAME = "Authorization";
-  public static final String HEADER_REFRESH_NAME = "X-Refresh-Token";
+  private static final String BEARER_PREFIX = "Bearer ";
+  private static final String HEADER_NAME = "Authorization";
+  private static final String HEADER_REFRESH_NAME = "X-Refresh-Token";
+  private static final String INVALID_FORMAT_TOKEN_MESSAGE = "Некорректный формат JWT токена";
+  private static final String EXPIRED_TOKEN_MESSAGE = "Срок действия токена истек";
+  private static final String VALIDATION_ERROR_TOKEN_MESSAGE = "Ошибка валидации токена";
+
   private final UserDetailService userService;
   private final ObjectMapper objectMapper;
 
@@ -79,25 +84,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
       filterChain.doFilter(request, response);
     } catch (MalformedJwtException e) {
-      log.warn("Некорректный формат JWT токена", e);
-      sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Некорректный формат JWT токена", e);
+      log.warn(INVALID_FORMAT_TOKEN_MESSAGE, e);
+      sendErrorResponse(response, HttpStatus.BAD_REQUEST, INVALID_FORMAT_TOKEN_MESSAGE, e);
     } catch (ExpiredJwtException e) {
-      log.warn("Срок действия токена истек", e);
+      log.warn(EXPIRED_TOKEN_MESSAGE, e);
+      updateAccessToken(refreshToken, request, response, filterChain, e);
+    } catch (FeignException.BadRequest ex) {
+      var body = ex.contentUTF8();
+      var node = objectMapper.readTree(body);
+      var message = node.get("message").asText();
 
-      try {
-        if (StringUtils.isNotEmpty(refreshToken)) {
-          var newAccessToken = userService.updateToken(refreshToken);
-          createSecurityContext(newAccessToken, refreshToken);
-          filterChain.doFilter(request, response);
-        } else {
-          sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Срок действия токена истек", e);
-        }
-      } catch (Exception ex) {
-        sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Срок действия токена истек", ex);
+      if (INVALID_FORMAT_TOKEN_MESSAGE.equals(message)) {
+        log.warn(INVALID_FORMAT_TOKEN_MESSAGE, ex);
+        sendErrorResponse(response, HttpStatus.BAD_REQUEST, INVALID_FORMAT_TOKEN_MESSAGE, ex);
+      } else if (EXPIRED_TOKEN_MESSAGE.equals(message)) {
+        log.warn(EXPIRED_TOKEN_MESSAGE, ex);
+        updateAccessToken(refreshToken, request, response, filterChain, ex);
+      } else {
+        throw new IllegalStateException(VALIDATION_ERROR_TOKEN_MESSAGE);
       }
     } catch (Exception e) {
-      log.warn("Ошибка валидации токена", e);
-      sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Ошибка валидации токена", e);
+      log.warn(VALIDATION_ERROR_TOKEN_MESSAGE, e);
+      sendErrorResponse(response, HttpStatus.BAD_REQUEST, VALIDATION_ERROR_TOKEN_MESSAGE, e);
     } finally {
       MDC.remove("token");
       MDC.remove("refreshToken");
@@ -160,5 +168,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     context.setAuthentication(authentication);
 
     SecurityContextHolder.setContext(context);
+  }
+
+  private void updateAccessToken(
+    String refreshToken,
+    HttpServletRequest request,
+    HttpServletResponse response,
+    FilterChain filterChain,
+    Exception ex
+  ) throws IOException {
+    try {
+      if (StringUtils.isNotEmpty(refreshToken)) {
+        var newAccessToken = userService.updateToken(refreshToken);
+        createSecurityContext(newAccessToken, refreshToken);
+        filterChain.doFilter(request, response);
+      } else {
+        sendErrorResponse(response, HttpStatus.BAD_REQUEST, EXPIRED_TOKEN_MESSAGE, ex);
+      }
+    } catch (Exception e) {
+      sendErrorResponse(response, HttpStatus.BAD_REQUEST, EXPIRED_TOKEN_MESSAGE, e);
+    }
   }
 }
