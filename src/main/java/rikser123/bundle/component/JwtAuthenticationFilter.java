@@ -180,6 +180,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     try {
       if (StringUtils.isNotEmpty(refreshToken)) {
         var newAccessToken = userService.updateToken(refreshToken);
+        MDC.put("token", newAccessToken);
         createSecurityContext(newAccessToken, refreshToken);
         filterChain.doFilter(request, response);
       } else {

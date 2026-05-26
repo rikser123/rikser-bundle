@@ -22,14 +22,14 @@ public class FeignConfig {
       String token = null;
       String refreshToken = null;
 
-      if (authentication != null && authentication.getDetails() instanceof TokenDto tokenDto) {
-        token = tokenDto.getAccessToken();
-        refreshToken = tokenDto.getRefreshToken();
-      }
-
       if (Objects.isNull(token)) {
         token = MDC.get("token");
         refreshToken = MDC.get("refreshToken");
+      }
+
+      if (authentication != null && authentication.getDetails() instanceof TokenDto tokenDto && Objects.isNull(token)) {
+        token = tokenDto.getAccessToken();
+        refreshToken = tokenDto.getRefreshToken();
       }
 
       if (!Objects.isNull(token)) {
