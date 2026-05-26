@@ -48,12 +48,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     HttpServletRequest request,
     HttpServletResponse response,
     FilterChain filterChain
-  ) throws IOException {
-    try {
-      authenticate(request, response, filterChain);
-    } catch (Exception e) {
-      sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Ошибка валидации токена", e);
-    }
+  ) throws IOException, ServletException {
+    authenticate(request, response, filterChain);
   }
 
   /**
