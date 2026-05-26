@@ -52,7 +52,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     try {
       authenticate(request, response, filterChain);
     } catch (Exception e) {
-      sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Ошибка валидации токена", e);
+      sendErrorResponse(
+        response,
+        HttpStatus.BAD_REQUEST,
+        StringUtils.defaultIfEmpty(e.getMessage(), "Ошибка валидации токена"),
+        e
+      );
     }
   }
 
@@ -84,7 +89,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     } catch (MalformedJwtException e) {
       log.warn("Некорректный формат JWT токена", e);
-      sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Некорректный формат JWT токена", e);
+      throw new IllegalStateException("Некорректный формат JWT токена");
     } catch (ExpiredJwtException e) {
       log.warn("Срок действия токена истек", e);
 
@@ -94,14 +99,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           createSecurityContext(newAccessToken, refreshToken);
           filterChain.doFilter(request, response);
         } else {
-          sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Срок действия токена истек", e);
+          throw new IllegalStateException("Срок действия токена истек");
         }
       } catch (Exception ex) {
-        sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Срок действия токена истек", ex);
+        throw new IllegalStateException("Срок действия токена истек");
       }
     } catch (Exception e) {
       log.warn("Ошибка валидации токена", e);
-      sendErrorResponse(response, HttpStatus.BAD_REQUEST, "Ошибка валидации токена", e);
+      throw new IllegalStateException("Ошибка валидации токена");
     } finally {
       MDC.remove("token");
       MDC.remove("refreshToken");
