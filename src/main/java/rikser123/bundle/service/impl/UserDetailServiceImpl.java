@@ -47,12 +47,7 @@ public class UserDetailServiceImpl implements UserDetailService {
 
   @Override
   public String updateToken(String refreshToken) {
-    try {
-      var response = securityClient.updateToken();
-      return response.getData().getToken();
-    } catch (Exception e) {
-      log.error("Не удалось обновить токен", e);
-      throw new IllegalStateException("Не удалось обновить токен");
-    }
+    var response = securityClient.updateToken();
+    return response.getData().getToken();
   }
 }
