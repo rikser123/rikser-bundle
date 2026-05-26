@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import rikser123.bundle.dto.response.RikserResponseItem;
@@ -94,6 +95,13 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(SqlSafeException.class)
   public ResponseEntity<RikserResponseItem> handleSqlSaveException(SqlSafeException exception) {
     log.warn("sql injection");
+    var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+  }
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<RikserResponseItem> handleMissingParam(MissingServletRequestParameterException exception) {
+    log.warn("missing required param");
     var response = RikserResponseUtils.createResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
