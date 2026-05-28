@@ -67,6 +67,9 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-actuator")
     api("org.zalando:logbook-spring-boot-starter:4.0.4")
     api("org.springframework.boot:spring-boot-starter-data-redis")
+    api("org.springframework.kafka:spring-kafka")
+    api("net.javacrumbs.shedlock:shedlock-spring:6.3.1")
+    api("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.3.1")
 
 
     compileOnly("org.projectlombok:lombok")
