@@ -22,5 +22,6 @@ logbook:
       - accountNonLocked
       - credentialsNonExpired
       - enabled
+      - publicKey
   write:
     max-body-size: 100000
