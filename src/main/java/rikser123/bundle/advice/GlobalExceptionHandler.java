@@ -21,9 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * Класс для работы с глобальными исключениями (синхронная версия)
- */
 
 @RestControllerAdvice
 @Slf4j
