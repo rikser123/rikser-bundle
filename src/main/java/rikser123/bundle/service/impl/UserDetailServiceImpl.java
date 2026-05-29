@@ -14,7 +14,8 @@ import rikser123.bundle.service.PublicKeyLoaderService;
 import rikser123.bundle.service.UserDetailService;
 
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -47,6 +48,9 @@ public class UserDetailServiceImpl implements UserDetailService {
     var publicKey = publicKeyLoaderService.getPublicKey();
     var userData = Jwts.parser().setSigningKey(publicKey).build().parseClaimsJws(token).getBody();
     var birthDate = userData.get("birthDate", String.class);
+    var privilegesList = userData.get("privileges", List.class);
+    var privileges = new HashSet<String>();
+    privileges.addAll(privilegesList);
 
     var user = new User();
     user.setLogin(userData.getSubject());
@@ -57,7 +61,7 @@ public class UserDetailServiceImpl implements UserDetailService {
     user.setMiddleName(userData.get("middleName", String.class));
     user.setLastName(userData.get("lastName", String.class));
     user.setBirthDate(StringUtils.isNoneEmpty(birthDate) ? LocalDate.parse(birthDate) : null);
-    user.setPrivileges(userData.get("privileges", Set.class));
+    user.setPrivileges(privileges);
 
     return user;
   }
