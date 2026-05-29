@@ -16,6 +16,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import rikser123.bundle.component.JwtAuthenticationFilter;
 import rikser123.bundle.feign.SecurityClient;
+import rikser123.bundle.service.PublicKeyLoaderService;
 import rikser123.bundle.service.UserDetailService;
 import rikser123.bundle.service.impl.UserDetailServiceImpl;
 
@@ -38,7 +39,7 @@ public class SecurityConfig {
       .cors(cors -> cors.configurationSource(corsConfigurationSource()))
       .anonymous(anonymous -> anonymous.disable())
       .authorizeHttpRequests(authorize -> authorize
-        .requestMatchers("/api/v1/user/register", "/api/v1/user/login", "/api/v1/user/token/refresh").permitAll()
+        .requestMatchers("/api/v1/user/register", "/api/v1/user/login", "/api/v1/user/token/refresh", "/api/v1/user/public-key").permitAll()
         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
         .requestMatchers("/actuator/**").permitAll()
         .anyRequest().authenticated()
@@ -92,7 +93,13 @@ public class SecurityConfig {
 
   @Bean
   @ConditionalOnProperty(name = "bundle.security.service.enabled", havingValue = "true", matchIfMissing = true)
-  public UserDetailService userDetailService(SecurityClient securityClient) {
-    return new UserDetailServiceImpl(securityClient);
+  public UserDetailService userDetailService(SecurityClient securityClient, PublicKeyLoaderService publicKeyLoaderService) {
+    return new UserDetailServiceImpl(securityClient, publicKeyLoaderService);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "bundle.security.service.enabled", havingValue = "true", matchIfMissing = true)
+  public PublicKeyLoaderService publicKeyLoaderService(SecurityClient securityClient) {
+    return new PublicKeyLoaderService(securityClient);
   }
 }

@@ -4,6 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import rikser123.bundle.dto.User;
+import rikser123.bundle.dto.response.PublicKeyResponseDto;
 import rikser123.bundle.dto.response.RikserResponseItem;
 import rikser123.bundle.dto.response.UpdateTokenResponseDto;
 
@@ -26,4 +27,11 @@ public interface SecurityClient {
     consumes = MediaType.APPLICATION_JSON_VALUE
   )
   RikserResponseItem<UpdateTokenResponseDto> updateToken();
+
+  @GetMapping(
+    value = "/api/v1/user/public-key",
+    produces = MediaType.APPLICATION_JSON_VALUE,
+    consumes = MediaType.APPLICATION_JSON_VALUE
+  )
+  RikserResponseItem<PublicKeyResponseDto> getPublicKey();
 }
