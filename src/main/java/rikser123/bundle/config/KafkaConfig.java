@@ -52,7 +52,7 @@ public class KafkaConfig {
   @Bean
   @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
   public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory producerFactory) {
-    return new KafkaTemplate<>(producerFactory);
+    return new KafkaTemplate<String, String>(producerFactory);
   }
 
   @Bean
