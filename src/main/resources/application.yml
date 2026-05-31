@@ -16,3 +16,4 @@ bundle:
     enabled: true
     user: ${KAFKA_USER}
     password: ${KAFKA_PASSWORD}
+    kafkaUrl: ${KAFKA_URL}
