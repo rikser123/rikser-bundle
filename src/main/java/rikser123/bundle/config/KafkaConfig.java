@@ -13,6 +13,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.zalando.logbook.BodyFilter;
 import rikser123.bundle.component.KafkaConsumerInterceptor;
 import rikser123.bundle.component.KafkaProducerInterceptor;
 import rikser123.bundle.feign.SecurityClient;
@@ -26,8 +27,12 @@ public class KafkaConfig {
 
   @Bean
   @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
-  public KafkaProducerInterceptor producerInterceptor(SecurityClient securityClient, PublicKeyLoaderService publicKeyLoaderService) {
-    return new KafkaProducerInterceptor(securityClient, publicKeyLoaderService);
+  public KafkaProducerInterceptor producerInterceptor(
+    SecurityClient securityClient,
+    PublicKeyLoaderService publicKeyLoaderService,
+    BodyFilter bodyFilter
+  ) {
+    return new KafkaProducerInterceptor(bodyFilter, securityClient, publicKeyLoaderService);
   }
 
   @Bean
@@ -42,8 +47,8 @@ public class KafkaConfig {
 
   @Bean
   @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
-  public KafkaConsumerInterceptor kafkaConsumerInterceptor(UserDetailService userDetailService) {
-    return new KafkaConsumerInterceptor(userDetailService);
+  public KafkaConsumerInterceptor kafkaConsumerInterceptor(UserDetailService userDetailService, BodyFilter bodyFilter) {
+    return new KafkaConsumerInterceptor(bodyFilter, userDetailService);
   }
 
   @Bean

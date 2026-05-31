@@ -4,24 +4,31 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.slf4j.MDC;
 import org.springframework.kafka.listener.RecordInterceptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.zalando.logbook.BodyFilter;
+import org.zalando.logbook.json.JsonHttpLogFormatter;
 import rikser123.bundle.dto.TokenDto;
 import rikser123.bundle.dto.User;
 import rikser123.bundle.service.UserDetailService;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaConsumerInterceptor implements RecordInterceptor<String, String> {
+  private static final JsonHttpLogFormatter formatter = new JsonHttpLogFormatter();
 
+  private final BodyFilter bodyFilter;
   private final UserDetailService userDetailService;
 
   private boolean isValidAuthorization(ConsumerRecord<String, String> record) {
@@ -89,6 +96,23 @@ public class KafkaConsumerInterceptor implements RecordInterceptor<String, Strin
 
   @Override
   public void afterRecord(ConsumerRecord<String, String> record, Consumer<String, String> consumer) {
+    try {
+      logKafkaMessage(record);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     RecordInterceptor.super.afterRecord(record, consumer);
+  }
+
+  private void logKafkaMessage(ConsumerRecord<String, String> record) throws IOException {
+    var filteredBody = bodyFilter.filter("application/json", record.value());
+
+    var logMap = new LinkedHashMap<String, Object>();
+    logMap.put("type", "KAFKA_CONSUME");
+    logMap.put("correlation", MDC.get("trace_id"));
+    logMap.put("topic", record.topic());
+    logMap.put("body", filteredBody);
+
+    log.info(formatter.format(logMap));
   }
 }
