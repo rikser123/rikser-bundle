@@ -13,6 +13,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import rikser123.bundle.dto.request.LoginRequestDto;
+import rikser123.bundle.dto.request.RikserRequestItem;
 import rikser123.bundle.feign.SecurityClient;
 import rikser123.bundle.service.PublicKeyLoaderService;
 
@@ -65,7 +66,12 @@ public class KafkaProducerInterceptor implements ProducerInterceptor<String, Str
     var loginDto = new LoginRequestDto();
     loginDto.setLogin(kafkaUser);
     loginDto.setPassword(kafkaPassword);
-    var result = securityClient.login(loginDto);
+
+    var request = new RikserRequestItem<LoginRequestDto>();
+    request.setChannel("System");
+    request.setData(loginDto);
+    
+    var result = securityClient.login(request);
 
     if (BooleanUtils.isFalse(result.isResult()) || StringUtils.isEmpty(result.getData().getToken())) {
       throw new IllegalStateException("Не удалось авторизатоваться системному пользователю!");

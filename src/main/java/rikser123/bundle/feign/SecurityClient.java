@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import rikser123.bundle.dto.User;
 import rikser123.bundle.dto.request.LoginRequestDto;
+import rikser123.bundle.dto.request.RikserRequestItem;
 import rikser123.bundle.dto.response.LoginResponseDto;
 import rikser123.bundle.dto.response.PublicKeyResponseDto;
 import rikser123.bundle.dto.response.RikserResponseItem;
@@ -45,5 +46,5 @@ public interface SecurityClient {
     produces = MediaType.APPLICATION_JSON_VALUE,
     consumes = MediaType.APPLICATION_JSON_VALUE
   )
-  RikserResponseItem<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto dto);
+  RikserResponseItem<LoginResponseDto> login(@RequestBody @Valid RikserRequestItem<LoginRequestDto> dto);
 }
