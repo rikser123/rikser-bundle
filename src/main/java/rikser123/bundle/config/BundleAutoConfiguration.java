@@ -21,7 +21,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
   SecurityConfig.class,
   ComponentConfig.class,
   FeignConfig.class,
-  RedisConfig.class
+  RedisConfig.class,
+  KafkaConfig.class
 })
 public class BundleAutoConfiguration {
 }

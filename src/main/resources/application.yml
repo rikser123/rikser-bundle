@@ -12,3 +12,7 @@ bundle:
     enabled: true
     TTL: P1D
     prefix: prefix
+  kafka:
+    enabled: true
+    user: ${KAFKA_USER}
+    password: ${KAFKA_PASSWORD}
