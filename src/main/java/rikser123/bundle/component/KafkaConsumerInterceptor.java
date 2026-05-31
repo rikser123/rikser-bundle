@@ -2,11 +2,9 @@ package rikser123.bundle.component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerInterceptor;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
-import org.apache.kafka.common.TopicPartition;
+import org.springframework.kafka.listener.RecordInterceptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,38 +15,14 @@ import rikser123.bundle.dto.User;
 import rikser123.bundle.service.UserDetailService;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class KafkaConsumerInterceptor implements ConsumerInterceptor<String, String> {
+public class KafkaConsumerInterceptor implements RecordInterceptor<String, String> {
+
   private final UserDetailService userDetailService;
-
-  @Override
-  public ConsumerRecords<String, String> onConsume(ConsumerRecords<String, String> records) {
-    var validatedRecords = new HashMap<TopicPartition, List<ConsumerRecord<String, String>>>();
-
-    for (var partition : records.partitions()) {
-      var partitionRecords = records.records(partition);
-      var validRecords = new ArrayList<ConsumerRecord<String, String>>();
-
-      for (ConsumerRecord<String, String> record : partitionRecords) {
-        if (isValidAuthorization(record)) {
-          validRecords.add(record);
-        } else {
-          log.warn("Invalid or missing token for record from topic: {}, offset: {}",
-            record.topic(), record.offset());
-        }
-      }
-      validatedRecords.put(partition, validRecords);
-    }
-
-    return new ConsumerRecords<>(validatedRecords);
-  }
 
   private boolean isValidAuthorization(ConsumerRecord<String, String> record) {
     var authHeader = record.headers().lastHeader("Authorization");
@@ -63,37 +37,24 @@ public class KafkaConsumerInterceptor implements ConsumerInterceptor<String, Str
     }
 
     try {
-      var context = SecurityContextHolder.createEmptyContext();
       var userDetails = userDetailService.getByUsername(token);
+      if (userDetails == null) {
+        log.warn("User not found: {}", token);
+        return false;
+      }
+
       var authentication = createAuthenticationToken(userDetails);
 
       var tokenDto = new TokenDto();
       tokenDto.setAccessToken(token);
       authentication.setDetails(tokenDto);
 
-      context.setAuthentication(authentication);
-
-      SecurityContextHolder.setContext(context);
+      SecurityContextHolder.getContext().setAuthentication(authentication);
       return true;
     } catch (Exception e) {
+      log.warn("Authorization failed for token: {}", e.getMessage());
       return false;
     }
-  }
-
-  @Override
-  public void onCommit(Map<TopicPartition, OffsetAndMetadata> map) {
-
-  }
-
-  @Override
-  public void close() {
-
-  }
-
-
-  @Override
-  public void configure(Map<String, ?> map) {
-
   }
 
   private UsernamePasswordAuthenticationToken createAuthenticationToken(UserDetails userDetails) {
@@ -105,4 +66,29 @@ public class KafkaConsumerInterceptor implements ConsumerInterceptor<String, Str
     return new UsernamePasswordAuthenticationToken(user, null, authorities);
   }
 
+  @Override
+  public ConsumerRecord<String, String> intercept(ConsumerRecord<String, String> record, Consumer<String, String> consumer) {
+    if (isValidAuthorization(record)) {
+      return record;
+    }
+
+    log.warn("Invalid or missing token for record from topic: {}, offset: {}, returning null",
+      record.topic(), record.offset());
+    return null;
+  }
+
+  @Override
+  public void success(ConsumerRecord<String, String> record, Consumer<String, String> consumer) {
+    RecordInterceptor.super.success(record, consumer);
+  }
+
+  @Override
+  public void failure(ConsumerRecord<String, String> record, Exception exception, Consumer<String, String> consumer) {
+    RecordInterceptor.super.failure(record, exception, consumer);
+  }
+
+  @Override
+  public void afterRecord(ConsumerRecord<String, String> record, Consumer<String, String> consumer) {
+    RecordInterceptor.super.afterRecord(record, consumer);
+  }
 }

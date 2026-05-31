@@ -19,7 +19,6 @@ import rikser123.bundle.feign.SecurityClient;
 import rikser123.bundle.service.PublicKeyLoaderService;
 import rikser123.bundle.service.UserDetailService;
 
-import java.util.Collections;
 import java.util.HashMap;
 
 @Configuration
@@ -33,12 +32,10 @@ public class KafkaConfig {
 
   @Bean
   @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
-  public ProducerFactory<String, String> producerFactory(KafkaProducerInterceptor producerInterceptor) {
+  public ProducerFactory<String, String> producerFactory() {
     var config = new HashMap<String, Object>();
     config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    config.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
-      Collections.singletonList(producerInterceptor.getClass()));
 
     return new DefaultKafkaProducerFactory<>(config);
   }
@@ -51,18 +48,18 @@ public class KafkaConfig {
 
   @Bean
   @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
-  public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory producerFactory) {
-    return new KafkaTemplate<String, String>(producerFactory);
+  public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory producerFactory, KafkaProducerInterceptor producerInterceptor) {
+    var template = new KafkaTemplate<String, String>(producerFactory);
+    template.setProducerInterceptor(producerInterceptor);
+    return template;
   }
 
   @Bean
   @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
-  public ConsumerFactory<String, String> consumerFactory(KafkaConsumerInterceptor interceptor) {
+  public ConsumerFactory<String, String> consumerFactory() {
     var props = new HashMap<String, Object>();
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG,
-      Collections.singletonList(interceptor.getClass()));
 
     return new DefaultKafkaConsumerFactory<>(props);
   }
@@ -70,10 +67,13 @@ public class KafkaConfig {
   @Bean
   @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
   public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(
-    ConsumerFactory<String, String> consumerFactory) {
+    ConsumerFactory<String, String> consumerFactory,
+    KafkaConsumerInterceptor kafkaConsumerInterceptor
+  ) {
     ConcurrentKafkaListenerContainerFactory<String, String> factory =
       new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(consumerFactory);
+    factory.setRecordInterceptor(kafkaConsumerInterceptor);
     return factory;
   }
 }
