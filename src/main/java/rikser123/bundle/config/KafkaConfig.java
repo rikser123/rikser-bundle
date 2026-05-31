@@ -16,6 +16,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.zalando.logbook.BodyFilter;
 import rikser123.bundle.component.KafkaConsumerInterceptor;
+import rikser123.bundle.component.KafkaLogger;
 import rikser123.bundle.component.KafkaProducerInterceptor;
 import rikser123.bundle.feign.SecurityClient;
 import rikser123.bundle.service.PublicKeyLoaderService;
@@ -29,13 +30,18 @@ public class KafkaConfig {
   private String bootstrapServers;
 
   @Bean
+  public KafkaLogger kafkaLogger(BodyFilter bodyFilter) {
+    return new KafkaLogger(bodyFilter);
+  }
+
+  @Bean
   @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
   public KafkaProducerInterceptor producerInterceptor(
     SecurityClient securityClient,
     PublicKeyLoaderService publicKeyLoaderService,
-    BodyFilter bodyFilter
+    KafkaLogger kafkaLogger
   ) {
-    return new KafkaProducerInterceptor(bodyFilter, securityClient, publicKeyLoaderService);
+    return new KafkaProducerInterceptor(kafkaLogger, securityClient, publicKeyLoaderService);
   }
 
   @Bean
@@ -51,8 +57,8 @@ public class KafkaConfig {
 
   @Bean
   @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
-  public KafkaConsumerInterceptor kafkaConsumerInterceptor(UserDetailService userDetailService, BodyFilter bodyFilter) {
-    return new KafkaConsumerInterceptor(bodyFilter, userDetailService);
+  public KafkaConsumerInterceptor kafkaConsumerInterceptor(UserDetailService userDetailService, KafkaLogger kafkaLogger) {
+    return new KafkaConsumerInterceptor(userDetailService, kafkaLogger);
   }
 
   @Bean
@@ -60,6 +66,7 @@ public class KafkaConfig {
   public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory producerFactory, KafkaProducerInterceptor producerInterceptor) {
     var template = new KafkaTemplate<String, String>(producerFactory);
     template.setProducerInterceptor(producerInterceptor);
+    template.setObservationEnabled(true);
     return template;
   }
 
@@ -83,6 +90,7 @@ public class KafkaConfig {
       new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(consumerFactory);
     factory.setRecordInterceptor(kafkaConsumerInterceptor);
+    factory.getContainerProperties().setObservationEnabled(true);
     return factory;
   }
 }

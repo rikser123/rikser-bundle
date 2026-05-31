@@ -1,6 +1,5 @@
 package rikser123.bundle.component;
 
-
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -10,11 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.zalando.logbook.BodyFilter;
-import org.zalando.logbook.json.JsonHttpLogFormatter;
 import rikser123.bundle.dto.request.LoginRequestDto;
 import rikser123.bundle.dto.request.RikserRequestItem;
 import rikser123.bundle.feign.SecurityClient;
@@ -22,16 +18,13 @@ import rikser123.bundle.service.PublicKeyLoaderService;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaProducerInterceptor implements ProducerInterceptor<String, String> {
-  private static final JsonHttpLogFormatter formatter = new JsonHttpLogFormatter();
-
-  private final BodyFilter bodyFilter;
+  private final KafkaLogger kafkaLogger;
   private final SecurityClient securityClient;
   private final PublicKeyLoaderService publicKeyLoaderService;
   @Value("${bundle.kafka.user}")
@@ -50,11 +43,11 @@ public class KafkaProducerInterceptor implements ProducerInterceptor<String, Str
   @Override
   public ProducerRecord<String, String> onSend(ProducerRecord<String, String> record) {
     try {
-      logKafkaMessage(record);
+      kafkaLogger.logKafkaMessage(record);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    
+
     record.headers().add("Authorization",
       ("Bearer " + getToken()).getBytes(StandardCharsets.UTF_8));
     return record;
@@ -122,17 +115,5 @@ public class KafkaProducerInterceptor implements ProducerInterceptor<String, Str
     } catch (Exception e) {
       return false;
     }
-  }
-
-  private void logKafkaMessage(ProducerRecord<String, String> record) throws IOException {
-    var filteredBody = bodyFilter.filter("application/json", record.value());
-
-    var logMap = new LinkedHashMap<String, Object>();
-    logMap.put("type", "KAFKA_CONSUME");
-    logMap.put("correlation", MDC.get("trace_id"));
-    logMap.put("topic", record.topic());
-    logMap.put("body", filteredBody);
-
-    log.info(formatter.format(logMap));
   }
 }
