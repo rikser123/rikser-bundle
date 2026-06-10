@@ -76,6 +76,7 @@ public class KafkaConfig {
     var props = new HashMap<String, Object>();
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
 
     return new DefaultKafkaConsumerFactory<>(props);
   }
