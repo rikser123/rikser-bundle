@@ -70,7 +70,7 @@ dependencies {
     api("org.springframework.kafka:spring-kafka")
     api("net.javacrumbs.shedlock:shedlock-spring:6.3.1")
     api("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.3.1")
-
+    api("io.micrometer:micrometer-registry-prometheus")
 
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
