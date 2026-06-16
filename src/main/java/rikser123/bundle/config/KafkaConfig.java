@@ -4,7 +4,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -26,14 +25,10 @@ import rikser123.bundle.service.UserDetailService;
 import java.util.HashMap;
 
 @Configuration
+@ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
 public class KafkaConfig {
-  private String bootstrapServers;
-
   @Value("${bundle.kafka.kafkaUrl}")
-  @Autowired(required = false)
-  public void setBootstrapServers(String bootstrapServers) {
-    this.bootstrapServers = bootstrapServers;
-  }
+  private String bootstrapServers;
 
   @Bean
   public KafkaLogger kafkaLogger(BodyFilter bodyFilter) {
@@ -41,7 +36,6 @@ public class KafkaConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
   public KafkaProducerInterceptor producerInterceptor(
     SecurityClient securityClient,
     PublicKeyLoaderService publicKeyLoaderService,
@@ -51,7 +45,6 @@ public class KafkaConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
   public ProducerFactory<String, String> producerFactory() {
     var config = new HashMap<String, Object>();
     config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -62,13 +55,11 @@ public class KafkaConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
   public KafkaConsumerInterceptor kafkaConsumerInterceptor(UserDetailService userDetailService, KafkaLogger kafkaLogger) {
     return new KafkaConsumerInterceptor(userDetailService, kafkaLogger);
   }
 
   @Bean
-  @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
   public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory producerFactory, KafkaProducerInterceptor producerInterceptor) {
     var template = new KafkaTemplate<String, String>(producerFactory);
     template.setProducerInterceptor(producerInterceptor);
@@ -77,7 +68,6 @@ public class KafkaConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
   public ConsumerFactory<String, String> consumerFactory() {
     var props = new HashMap<String, Object>();
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -88,7 +78,6 @@ public class KafkaConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
   public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(
     ConsumerFactory<String, String> consumerFactory,
     KafkaConsumerInterceptor kafkaConsumerInterceptor
