@@ -8,8 +8,11 @@ import rikser123.bundle.advice.GlobalExceptionHandler;
 import rikser123.bundle.advice.RikserResponseInterceptor;
 import rikser123.bundle.component.ConstraintValidator;
 import rikser123.bundle.component.TransactionHandler;
+import rikser123.bundle.repository.entity.OutboxMessageStatus;
 import rikser123.bundle.service.StatusMatrix;
 import rikser123.bundle.service.impl.StatusMatrixImpl;
+
+import java.util.EnumSet;
 
 @Configuration
 public class ComponentConfig {
@@ -36,5 +39,13 @@ public class ComponentConfig {
   @Bean
   public ConstraintValidator constraintValidator(Validator validator, ObjectMapper objectMapper) {
     return new ConstraintValidator(validator, objectMapper);
+  }
+
+  @Bean
+  public StatusMatrix<OutboxMessageStatus> outboxStatusMatrix() {
+    var statusMatrix = new StatusMatrixImpl<OutboxMessageStatus>();
+    statusMatrix.addTransition(OutboxMessageStatus.CREATED, EnumSet.of(OutboxMessageStatus.SENT));
+
+    return statusMatrix;
   }
 }

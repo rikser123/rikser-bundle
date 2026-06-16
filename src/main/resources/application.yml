@@ -17,3 +17,4 @@ bundle:
     user: ${KAFKA_USER}
     password: ${KAFKA_PASSWORD}
     kafkaUrl: ${KAFKA_URL}
+    max-fetch-limit: 100
