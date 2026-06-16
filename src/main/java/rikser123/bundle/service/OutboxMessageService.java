@@ -14,7 +14,7 @@ import java.util.List;
 @Slf4j
 public abstract class OutboxMessageService<T extends OutboxMessage> {
   private final StatusMatrix<OutboxMessageStatus> outboxStatusMatrix;
-  private final OutboxMessageRepository outboxMessageRepository;
+  private final OutboxMessageRepository<T> outboxMessageRepository;
 
   @Value("${bundle.kafka.max-fetch-limit}")
   private int maxFetchLimit;
@@ -27,6 +27,10 @@ public abstract class OutboxMessageService<T extends OutboxMessage> {
   @Transactional
   public List<T> saveAll(List<T> messages) {
     return outboxMessageRepository.saveAll(messages);
+  }
+
+  public T save(T message) {
+    return outboxMessageRepository.save(message);
   }
 
   public List<T> findAllByStatus(OutboxMessageStatus status) {
