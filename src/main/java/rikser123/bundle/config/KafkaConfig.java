@@ -27,7 +27,7 @@ import java.util.HashMap;
 @Configuration
 @ConditionalOnProperty(name = "bundle.kafka.enabled", havingValue = "true")
 public class KafkaConfig {
-  @Value("${bundle.kafka.kafkaUrl}")
+  @Value("${bundle.kafka.kafka-url}")
   private String bootstrapServers;
 
   @Bean
