@@ -3,6 +3,15 @@ package rikser123.bundle.service;
 import java.util.Optional;
 
 public interface RedisCacheService {
+  /**
+   * Сохранить значение в кэш
+   *
+   * @param key   ключ
+   * @param value значение
+   * @param ttl   время жизни
+   */
+  <T> void put(String key, T value, String ttl);
+
 
   /**
    * Сохранить значение в кэш

@@ -2,8 +2,10 @@ package rikser123.bundle.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import rikser123.bundle.service.RedisCacheService;
@@ -26,9 +28,15 @@ public class RedisCacheServiceImpl implements RedisCacheService {
 
   @Override
   public <T> void put(String key, T value) {
+    put(key, value);
+  }
+
+  @Override
+  public <T> void put(String key, T value, @Nullable String ttl) {
     try {
       var valueStr = objectMapper.writeValueAsString(value);
-      redisTemplate.opsForValue().set(searchPrefix + key, valueStr, Duration.parse(TTL));
+      var ttlStr = StringUtils.isNoneEmpty(ttl) ? ttl : TTL;
+      redisTemplate.opsForValue().set(searchPrefix + key, valueStr, Duration.parse(ttlStr));
       log.info("in redis {}", searchPrefix + key);
     } catch (Exception e) {
       log.warn("Error saving to Redis: {}", e.getMessage(), e);
