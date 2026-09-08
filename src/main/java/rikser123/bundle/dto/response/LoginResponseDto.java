@@ -11,5 +11,4 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LoginResponseDto {
   private String token;
-  private String refreshToken;
 }

@@ -77,7 +77,7 @@ public class KafkaProducerInterceptor implements ProducerInterceptor<String, Str
     request.setChannel("System");
     request.setData(loginDto);
 
-    var result = securityClient.login(request);
+    var result = securityClient.loginSystem(request);
 
     if (BooleanUtils.isFalse(result.isResult()) || StringUtils.isEmpty(result.getData().getToken())) {
       throw new IllegalStateException("Не удалось авторизатоваться системному пользователю!");

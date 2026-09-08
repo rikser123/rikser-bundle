@@ -42,9 +42,9 @@ public interface SecurityClient {
   RikserResponseItem<PublicKeyResponseDto> getPublicKey();
 
   @PostMapping(
-    value = "/api/v1/user/login",
+    value = "/api/v1/user/login/system",
     produces = MediaType.APPLICATION_JSON_VALUE,
     consumes = MediaType.APPLICATION_JSON_VALUE
   )
-  RikserResponseItem<LoginResponseDto> login(@RequestBody @Valid RikserRequestItem<LoginRequestDto> dto);
+  RikserResponseItem<LoginResponseDto> loginSystem(@RequestBody @Valid RikserRequestItem<LoginRequestDto> dto);
 }
