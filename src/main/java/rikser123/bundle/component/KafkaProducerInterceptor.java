@@ -1,6 +1,5 @@
 package rikser123.bundle.component;
 
-import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,34 +9,51 @@ import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 import rikser123.bundle.dto.request.LoginRequestDto;
 import rikser123.bundle.dto.request.RikserRequestItem;
 import rikser123.bundle.feign.SecurityClient;
-import rikser123.bundle.service.PublicKeyLoaderService;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ScheduledFuture;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaProducerInterceptor implements ProducerInterceptor<String, String> {
+  private static final int REFRESH_MINUTES_MARGIN = 3;
+
   private final KafkaLogger kafkaLogger;
   private final SecurityClient securityClient;
-  private final PublicKeyLoaderService publicKeyLoaderService;
+  private final TaskScheduler taskScheduler;
+
   @Value("${bundle.kafka.user}")
   private String kafkaUser;
 
   @Value("${bundle.kafka.password}")
   private String kafkaPassword;
 
+  @Value("${bundle.expiration-time}")
+  private long expirationTime;
+
   private volatile String token;
+  private volatile Instant expiry;
+
+  private ScheduledFuture<?> scheduledFuture;
 
   @PostConstruct
   void init() {
-    this.token = fetchToken();
+    try {
+      applyNewToken();
+    } catch (RuntimeException e) {
+      throw new IllegalStateException("Не удалось получить токен при старте приложения", e);
+    }
   }
 
   @Override
@@ -45,11 +61,11 @@ public class KafkaProducerInterceptor implements ProducerInterceptor<String, Str
     try {
       kafkaLogger.logKafkaMessage(record);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      log.warn("Не удалось залогировать сообщение кафки");
     }
 
     record.headers().add("Authorization",
-      ("Bearer " + getToken()).getBytes(StandardCharsets.UTF_8));
+      ("Bearer " + token).getBytes(StandardCharsets.UTF_8));
     return record;
   }
 
@@ -86,34 +102,37 @@ public class KafkaProducerInterceptor implements ProducerInterceptor<String, Str
     return result.getData().getToken();
   }
 
-  private String getToken() {
-    var currentToken = this.token;
+  private void applyNewToken() {
+    this.token = fetchToken();
+    this.expiry = Instant.now().plusMillis(expirationTime);
+    scheduleNextRefresh(expiry.minus(REFRESH_MINUTES_MARGIN, ChronoUnit.MINUTES));
+  }
 
-    if (isTokenValid(currentToken)) {
-      return currentToken;
-    }
-
-    synchronized (this) {
-      if (isTokenValid(this.token)) {
-        return this.token;
-      }
-
-      log.info("System user token is outdated. Try to update");
-      var newToken = fetchToken();
-      this.token = newToken;
-      return newToken;
+  private synchronized void refreshToken() {
+    try {
+      applyNewToken();
+    } catch (RuntimeException e) {
+      log.error("Can not update user system token, try again", e);
+      scheduleRetry();
     }
   }
 
-  private boolean isTokenValid(String token) {
-    if (token == null) return false;
+  private void scheduleNextRefresh(Instant when) {
+    cancelPrevious();
+    scheduledFuture = taskScheduler.schedule(this::refreshToken, when);
+  }
 
-    try {
-      var publicKey = publicKeyLoaderService.getPublicKey();
-      Jwts.parser().setSigningKey(publicKey).build().parseClaimsJws(token);
-      return true;
-    } catch (Exception e) {
-      return false;
+  private void scheduleRetry() {
+    cancelPrevious();
+    scheduledFuture = taskScheduler.schedule(
+      this::refreshToken,
+      Instant.now().plus(1, ChronoUnit.MINUTES)
+    );
+  }
+
+  private void cancelPrevious() {
+    if (!Objects.isNull(scheduledFuture) && !scheduledFuture.isDone()) {
+      scheduledFuture.cancel(false);
     }
   }
 }
