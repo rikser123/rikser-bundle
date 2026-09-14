@@ -39,7 +39,7 @@ public class KafkaProducerInterceptor implements ProducerInterceptor<String, Str
   @Value("${bundle.kafka.password}")
   private String kafkaPassword;
 
-  @Value("${bundle.expiration-time}")
+  @Value("${bundle.kafka.expiration-time}")
   private long expirationTime;
 
   private volatile String token;
