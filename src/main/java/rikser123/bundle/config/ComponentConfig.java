@@ -1,6 +1,5 @@
 package rikser123.bundle.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,8 +36,8 @@ public class ComponentConfig {
   }
 
   @Bean
-  public ConstraintValidator constraintValidator(Validator validator, ObjectMapper objectMapper) {
-    return new ConstraintValidator(validator, objectMapper);
+  public ConstraintValidator constraintValidator(Validator validator) {
+    return new ConstraintValidator(validator);
   }
 
   @Bean
