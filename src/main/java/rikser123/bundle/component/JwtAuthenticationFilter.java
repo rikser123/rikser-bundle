@@ -18,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import rikser123.bundle.dto.TokenDto;
@@ -146,13 +145,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   /**
    * Создает объект аутентификации на основе UserDetails
    */
-  private UsernamePasswordAuthenticationToken createAuthenticationToken(UserDetails userDetails) {
-    var user = (User) userDetails;
-    List<SimpleGrantedAuthority> authorities = user.getPrivileges().stream()
+  private UsernamePasswordAuthenticationToken createAuthenticationToken(User userDetails) {
+    List<SimpleGrantedAuthority> authorities = userDetails.getPrivileges().stream()
       .map(SimpleGrantedAuthority::new)
       .toList();
 
-    return new UsernamePasswordAuthenticationToken(user, null, authorities);
+    return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
   }
 
   private void createSecurityContext(String token, String refreshToken) {

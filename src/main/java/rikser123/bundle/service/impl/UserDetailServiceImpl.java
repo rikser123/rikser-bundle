@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import rikser123.bundle.dto.User;
@@ -30,12 +29,12 @@ public class UserDetailServiceImpl implements UserDetailService {
   private final PublicKeyLoaderService publicKeyLoaderService;
 
   @Override
-  public UserDetails getCurrentUser() {
+  public User getCurrentUser() {
     var authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication == null) {
       throw new RuntimeException("Пользователь не аутентифицирован");
     }
-    return (UserDetails) authentication.getPrincipal();
+    return (User) authentication.getPrincipal();
   }
 
   @Override
@@ -44,7 +43,7 @@ public class UserDetailServiceImpl implements UserDetailService {
   }
 
   @Override
-  public UserDetails getByUsername(String token) {
+  public User getByUsername(String token) {
     var publicKey = publicKeyLoaderService.getPublicKey();
     var userData = Jwts.parser().setSigningKey(publicKey).build().parseClaimsJws(token).getBody();
     var birthDate = userData.get("birthDate", String.class);

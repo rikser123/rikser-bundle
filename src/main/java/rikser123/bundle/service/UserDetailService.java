@@ -1,7 +1,7 @@
 package rikser123.bundle.service;
 
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import rikser123.bundle.dto.User;
 
 /**
  * Интерфейс для взаимодейтвия с польльзователями
@@ -12,7 +12,7 @@ public interface UserDetailService {
    *
    * @return Пользователь
    */
-  UserDetails getCurrentUser();
+  User getCurrentUser();
 
   /**
    * Метод получения сервиса пользователей для контекста безопасности  *
@@ -27,7 +27,7 @@ public interface UserDetailService {
    * @param token Токен безопасности из запроса
    * @return Сервис пользователей
    */
-  UserDetails getByUsername(String token);
+  User getByUsername(String token);
 
   /**
    * Метод обновления токена  *

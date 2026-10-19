@@ -8,7 +8,6 @@ import org.springframework.kafka.listener.RecordInterceptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import rikser123.bundle.dto.TokenDto;
 import rikser123.bundle.dto.User;
@@ -58,8 +57,7 @@ public class KafkaConsumerInterceptor implements RecordInterceptor<String, Strin
     }
   }
 
-  private UsernamePasswordAuthenticationToken createAuthenticationToken(UserDetails userDetails) {
-    var user = (User) userDetails;
+  private UsernamePasswordAuthenticationToken createAuthenticationToken(User user) {
     List<SimpleGrantedAuthority> authorities = user.getPrivileges().stream()
       .map(SimpleGrantedAuthority::new)
       .toList();
