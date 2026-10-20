@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import rikser123.bundle.config.FeignConfig;
 import rikser123.bundle.dto.User;
 import rikser123.bundle.dto.request.LoginRequestDto;
 import rikser123.bundle.dto.request.RikserRequestItem;
@@ -17,7 +18,8 @@ import rikser123.bundle.dto.response.UpdateTokenResponseDto;
 
 @FeignClient(
   name = "security-client",
-  url = "${bundle.security.service.url}"
+  url = "${bundle.security.service.url}",
+  configuration = FeignConfig.class
 )
 public interface SecurityClient {
   @GetMapping(
